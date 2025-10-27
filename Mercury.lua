@@ -1,5 +1,23 @@
-function Tab:CreateLabel(Text, Icon)
-			local--[[
+function Tab:CreateLabel(Text, Icon, Color)
+			local Label = Elements.Template.Label:Clone()
+			Label.Title.Text = Text
+			Label.Visible = true
+			Label.Parent = TabPage
+			
+			if Color then
+				Label.BackgroundColor3 = Color
+			end
+			
+			local LabelValue = {}
+			function LabelValue:Set(NewText, NewColor)
+				Label.Title.Text = NewText
+				if NewColor then
+					Label.BackgroundColor3 = NewColor
+				end
+			end
+			
+			return LabelValue
+		end--[[
 	Mercury Interface Suite
 	Clean, minimal UI library
 ]]
@@ -22,6 +40,7 @@ local ConfigurationFolder = MercuryFolder.."/Configurations"
 local ConfigurationExtension = ".json"
 local CFileName = nil
 local CEnabled = false
+local ErrorNotificationsEnabled = true -- Global error notification setting
 
 -- Create folders if needed
 if isfolder and not isfolder(MercuryFolder) then
@@ -326,6 +345,58 @@ function MercuryLibrary:LoadConfiguration()
 	end
 end
 
+function MercuryLibrary:Notify(Settings)
+	task.spawn(function()
+		Settings = Settings or {}
+		local Title = Settings.Title or "Notification"
+		local Content = Settings.Content or ""
+		local Duration = Settings.Duration or 3
+		
+		print("[Mercury] " .. Title .. ": " .. Content)
+		
+		-- Create notification UI element if Mercury interface exists
+		-- This would need the actual notification template from the UI
+	end)
+end
+
+function MercuryLibrary:SetTheme(ThemeName)
+	if typeof(ThemeName) == 'string' and MercuryLibrary.Theme[ThemeName] then
+		ChangeTheme(ThemeName)
+	elseif typeof(ThemeName) == 'table' then
+		ChangeTheme(ThemeName)
+	end
+end
+
+function MercuryLibrary:GetThemes()
+	local themes = {}
+	for name, _ in pairs(MercuryLibrary.Theme) do
+		table.insert(themes, name)
+	end
+	return themes
+end
+
+function MercuryLibrary:SetErrorNotifications(enabled)
+	ErrorNotificationsEnabled = enabled
+end
+
+function MercuryLibrary:GetErrorNotifications()
+	return ErrorNotificationsEnabled
+end
+
+local function ShowError(elementName, errorMessage)
+	if ErrorNotificationsEnabled then
+		warn("Mercury Error [" .. elementName .. "]: " .. tostring(errorMessage))
+		MercuryLibrary:Notify({
+			Title = "Callback Error",
+			Content = elementName .. " encountered an error. Check console for details.",
+			Duration = 3
+		})
+	else
+		-- Still log to console even if notifications disabled
+		warn("Mercury Error [" .. elementName .. "]: " .. tostring(errorMessage))
+	end
+end
+
 function MercuryLibrary:CreateWindow(Settings)
 	Settings = Settings or {}
 	
@@ -514,7 +585,10 @@ function MercuryLibrary:CreateWindow(Settings)
 			Button.Parent = TabPage
 			
 			Button.Interact.MouseButton1Click:Connect(function()
-				pcall(ButtonSettings.Callback)
+				local success, err = pcall(ButtonSettings.Callback)
+				if not success then
+					ShowError(ButtonSettings.Name, err)
+				end
 			end)
 			
 			local ButtonValue = {}
@@ -537,13 +611,19 @@ function MercuryLibrary:CreateWindow(Settings)
 			
 			Toggle.Interact.MouseButton1Click:Connect(function()
 				ToggleSettings.CurrentValue = not ToggleSettings.CurrentValue
-				pcall(ToggleSettings.Callback, ToggleSettings.CurrentValue)
+				local success, err = pcall(ToggleSettings.Callback, ToggleSettings.CurrentValue)
+				if not success then
+					ShowError(ToggleSettings.Name, err)
+				end
 				SaveConfiguration()
 			end)
 			
 			function ToggleSettings:Set(Value)
 				ToggleSettings.CurrentValue = Value
-				pcall(ToggleSettings.Callback, Value)
+				local success, err = pcall(ToggleSettings.Callback, Value)
+				if not success then
+					ShowError(ToggleSettings.Name, err)
+				end
 				SaveConfiguration()
 			end
 			
@@ -562,12 +642,65 @@ function MercuryLibrary:CreateWindow(Settings)
 			Slider.Parent = TabPage
 			
 			SliderSettings.CurrentValue = SliderSettings.CurrentValue or SliderSettings.Range[1]
+			SliderSettings.Range = SliderSettings.Range or {0, 100}
+			SliderSettings.Increment = SliderSettings.Increment or 1
 			
-			-- Slider logic here (simplified for brevity)
+			local Dragging = false
+			local SliderMain = Slider.Main
+			local Progress = SliderMain.Progress
+			local Info = SliderMain.Information
+			
+			local function UpdateSlider(Value)
+				local Percentage = (Value - SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])
+				Progress.Size = UDim2.new(Percentage, 0, 1, 0)
+				
+				if SliderSettings.Suffix then
+					Info.Text = tostring(Value) .. " " .. SliderSettings.Suffix
+				else
+					Info.Text = tostring(Value)
+				end
+				
+				SliderSettings.CurrentValue = Value
+			end
+			
+			UpdateSlider(SliderSettings.CurrentValue)
+			
+			SliderMain.Interact.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+					Dragging = true
+				end
+			end)
+			
+			SliderMain.Interact.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+					Dragging = false
+				end
+			end)
+			
+			UserInputService.InputChanged:Connect(function(input)
+				if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+					local MousePos = UserInputService:GetMouseLocation().X
+					local SliderPos = SliderMain.AbsolutePosition.X
+					local SliderSize = SliderMain.AbsoluteSize.X
+					
+					local Percentage = math.clamp((MousePos - SliderPos) / SliderSize, 0, 1)
+					local Value = SliderSettings.Range[1] + (Percentage * (SliderSettings.Range[2] - SliderSettings.Range[1]))
+					Value = math.floor(Value / SliderSettings.Increment + 0.5) * SliderSettings.Increment
+					Value = math.clamp(Value, SliderSettings.Range[1], SliderSettings.Range[2])
+					
+					UpdateSlider(Value)
+					pcall(SliderSettings.Callback, Value)
+					SaveConfiguration()
+				end
+			end)
 			
 			function SliderSettings:Set(Value)
-				SliderSettings.CurrentValue = Value
-				pcall(SliderSettings.Callback, Value)
+				Value = math.clamp(Value, SliderSettings.Range[1], SliderSettings.Range[2])
+				UpdateSlider(Value)
+				local success, err = pcall(SliderSettings.Callback, Value)
+				if not success then
+					ShowError(SliderSettings.Name, err)
+				end
 				SaveConfiguration()
 			end
 			
@@ -586,11 +719,121 @@ function MercuryLibrary:CreateWindow(Settings)
 			Dropdown.Parent = TabPage
 			
 			DropdownSettings.CurrentOption = DropdownSettings.CurrentOption or {}
+			DropdownSettings.Options = DropdownSettings.Options or {}
+			DropdownSettings.MultipleOptions = DropdownSettings.MultipleOptions or false
+			
+			if type(DropdownSettings.CurrentOption) == "string" then
+				DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
+			end
+			
+			local DropdownList = Dropdown.List
+			local Selected = Dropdown.Selected
+			local IsOpen = false
+			
+			local function UpdateText()
+				if #DropdownSettings.CurrentOption == 0 then
+					Selected.Text = "None"
+				elseif #DropdownSettings.CurrentOption == 1 then
+					Selected.Text = DropdownSettings.CurrentOption[1]
+				else
+					Selected.Text = "Multiple"
+				end
+			end
+			
+			UpdateText()
+			DropdownList.Visible = false
+			
+			-- Clear existing options
+			for _, child in ipairs(DropdownList:GetChildren()) do
+				if child:IsA("Frame") and child.Name ~= "Template" then
+					child:Destroy()
+				end
+			end
+			
+			-- Create options
+			for _, option in ipairs(DropdownSettings.Options) do
+				local OptionFrame = DropdownList.Template:Clone()
+				OptionFrame.Name = option
+				OptionFrame.Title.Text = option
+				OptionFrame.Visible = true
+				OptionFrame.Parent = DropdownList
+				
+				OptionFrame.Interact.MouseButton1Click:Connect(function()
+					if table.find(DropdownSettings.CurrentOption, option) then
+						-- Remove option
+						table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, option))
+					else
+						-- Add option
+						if not DropdownSettings.MultipleOptions then
+							table.clear(DropdownSettings.CurrentOption)
+						end
+						table.insert(DropdownSettings.CurrentOption, option)
+					end
+					
+					UpdateText()
+					pcall(DropdownSettings.Callback, DropdownSettings.CurrentOption)
+					SaveConfiguration()
+					
+					if not DropdownSettings.MultipleOptions then
+						DropdownList.Visible = false
+						IsOpen = false
+					end
+				end)
+			end
+			
+			Dropdown.Interact.MouseButton1Click:Connect(function()
+				IsOpen = not IsOpen
+				DropdownList.Visible = IsOpen
+			end)
 			
 			function DropdownSettings:Set(Option)
+				if type(Option) == "string" then
+					Option = {Option}
+				end
+				
 				DropdownSettings.CurrentOption = Option
+				UpdateText()
 				pcall(DropdownSettings.Callback, Option)
 				SaveConfiguration()
+			end
+			
+			function DropdownSettings:Refresh(NewOptions)
+				DropdownSettings.Options = NewOptions
+				
+				-- Clear and recreate options
+				for _, child in ipairs(DropdownList:GetChildren()) do
+					if child:IsA("Frame") and child.Name ~= "Template" then
+						child:Destroy()
+					end
+				end
+				
+				for _, option in ipairs(NewOptions) do
+					local OptionFrame = DropdownList.Template:Clone()
+					OptionFrame.Name = option
+					OptionFrame.Title.Text = option
+					OptionFrame.Visible = true
+					OptionFrame.Parent = DropdownList
+					
+					OptionFrame.Interact.MouseButton1Click:Connect(function()
+						if table.find(DropdownSettings.CurrentOption, option) then
+							table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, option))
+						else
+							if not DropdownSettings.MultipleOptions then
+								table.clear(DropdownSettings.CurrentOption)
+							end
+							table.insert(DropdownSettings.CurrentOption, option)
+						end
+						
+						UpdateText()
+						pcall(DropdownSettings.Callback, DropdownSettings.CurrentOption)
+						SaveConfiguration()
+						
+						if not DropdownSettings.MultipleOptions then
+							DropdownList.Visible = false
+							IsOpen = false
+						end
+					end)
+				end
 			end
 			
 			if DropdownSettings.Flag then
