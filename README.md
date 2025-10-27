@@ -38,13 +38,13 @@ Mercury Interactive is a clean, minimal UI library designed for Roblox script in
 ## Installation
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
 ```
 
 ## Quick Start
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
 
 -- Create Window
 local Window = Mercury:CreateWindow({
@@ -675,7 +675,7 @@ Tab:CreateToggle({
 ### Example 1: Simple Script Hub
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
 
 local Window = Mercury:CreateWindow({
     Name = "Simple Hub",
@@ -717,7 +717,7 @@ MainTab:CreateButton({
 ### Example 2: Advanced Script with Configuration
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
 
 -- Global variables
 _G.AutoFarm = false
@@ -857,7 +857,7 @@ Mercury:LoadConfiguration()
 ### Example 3: Dynamic UI Updates
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
 
 local Window = Mercury:CreateWindow({
     Name = "Dynamic UI Example"
@@ -1105,6 +1105,16 @@ Modifications include:
 - Added additional themes
 - Improved error handling
 - Enhanced documentation
+
+## License
+
+MIT License - see LICENSE file for details.
+
+Based on Rayfield Interface Suite by Sirius Software.
+
+## Support
+
+For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInteractive/issues).
 
 ## Changelog
 
