@@ -1,69 +1,4 @@
-ColorPicker:Remove()                    -- Remove picker from UI
-```
-
-### CodeBox
-
-Create multi-line code editors with syntax highlighting support.
-
-```lua
-local CodeBox = Tab:CreateCodeBox({
-    Name = "Code Editor",               -- String: CodeBox label
-    CurrentCode = "",                   -- String: Initial code
-    Placeholder = "-- Enter code...",   -- String: Placeholder text
-    Height = 200,                       -- Number: Box height in pixels
-    Flag = "CodeBox1",                  -- String: For config saving (optional)
-    ExecuteCallback = function(code)    -- Function: Custom execution handler
-        print("Executing:", code)
-        -- Custom code execution logic
-    end
-})
-
--- CodeBox Methods
-CodeBox:Set("print('Hello World')")    -- Set code content
-local code = CodeBox:Get()             -- Get current code (returns string)
-CodeBox:Clear()                        -- Clear all code
-CodeBox:SetExecuteCallback(function(code)  -- Change execution handler
-    loadstring(code)()
-end)
-CodeBox:Remove()                       -- Remove codebox from UI
-
--- Built-in buttons:
--- Execute - Runs the code (uses ExecuteCallback or default loadstring)
--- Copy - Copies code to clipboard (requires setclipboard)
--- Clear - Clears all code from the box
-```
-
-## Startup Screen
-
-Mercury includes an optional customizable startup screen that displays before your UI loads.
-
-### Basic Startup
-
-```lua
-local Window = Mercury:CreateWindow({
-    Name = "My Script",
-    Startup = {
-        Enabled = true,
-        Title = "My Script Hub",
-        Subtitle = "Version 1.0.0",
-        Duration = 2
-    }
-})
-```
-
-### Advanced Startup with Image
-
-```lua
-local Window = Mercury:CreateWindow({
-    Name = "Pro Hub",
-    Startup = {
-        Enabled = true,
-        Title = "Pro Script Hub",
-        Subtitle = "Loading modules...",
-        Image = "rbxassetid://YOUR_IMAGE_ID",
-        ImageSize = 256,
-        BackgroundColor = Color3.fromRGB(15, 15, 25),
-        TitleColor = Color3.fromRGB(255, 255, # Mercury Interactive
+# Mercury Interactive
 
 A modern UI library for Roblox scripts, based on Rayfield Interface Suite.
 
@@ -200,20 +135,6 @@ local Window = Mercury:CreateWindow({
     ConfigurationSaving = {
         Enabled = true,                 -- Boolean: Enable config system
         FileName = "ConfigName"         -- String: Configuration file name
-    },
-    Startup = {                         -- Optional startup screen
-        Enabled = false,                -- Boolean: Show startup animation
-        Title = "My Script",            -- String: Startup title
-        Subtitle = "Loading...",        -- String: Startup subtitle
-        Image = "rbxassetid://123456",  -- String: Image asset ID (optional)
-        ImageSize = 200,                -- Number: Image size in pixels
-        BackgroundColor = Color3.fromRGB(20, 20, 20),  -- Color3: Background color
-        TitleColor = Color3.fromRGB(255, 255, 255),    -- Color3: Title color
-        SubtitleColor = Color3.fromRGB(200, 200, 200), -- Color3: Subtitle color
-        TitleSize = 32,                 -- Number: Title text size
-        SubtitleSize = 18,              -- Number: Subtitle text size
-        Duration = 2,                   -- Number: Display time in seconds
-        Animation = "fade"              -- String: "fade", "scale", or "rotate"
     }
 })
 ```
@@ -493,116 +414,8 @@ local color = ColorPicker:Get()         -- Get current color (returns Color3)
 ColorPicker:SetCallback(function(Color) -- Change callback
     print("New color:", Color)
 end)
-```lua
-local Window = Mercury:CreateWindow({
-    Name = "Pro Hub",
-    Startup = {
-        Enabled = true,
-        Title = "Pro Script Hub",
-        Subtitle = "Loading modules...",
-        Image = "rbxassetid://YOUR_IMAGE_ID",
-        ImageSize = 256,
-        BackgroundColor = Color3.fromRGB(15, 15, 25),
-        TitleColor = Color3.fromRGB(255, 255, 255),
-        SubtitleColor = Color3.fromRGB(180, 180, 220),
-        TitleSize = 36,
-        SubtitleSize = 20,
-        Duration = 3,
-        Animation = "scale"             -- Options: "fade", "scale", "rotate"
-    }
-})
+ColorPicker:Remove()                    -- Remove picker from UI
 ```
-
-### Startup Animation Types
-
-| Animation | Description |
-|-----------|-------------|
-| fade | Image fades in smoothly (default) |
-| scale | Image scales up from center |
-| rotate | Image continuously rotates |
-
-### Startup Configuration
-
-```lua
-Startup = {
-    Enabled = false,                    -- Boolean: Enable startup screen (default: false)
-    Title = "Script Name",              -- String: Main title text
-    Subtitle = "Loading...",            -- String: Subtitle text (optional)
-    Image = "rbxassetid://12345",       -- String: Image asset ID (optional)
-    ImageSize = 200,                    -- Number: Image dimensions in pixels
-    BackgroundColor = Color3.fromRGB(20, 20, 20),  -- Color3: Screen background
-    TitleColor = Color3.fromRGB(255, 255, 255),    -- Color3: Title text color
-    SubtitleColor = Color3.fromRGB(200, 200, 200), -- Color3: Subtitle color
-    TitleSize = 32,                     -- Number: Title font size
-    SubtitleSize = 18,                  -- Number: Subtitle font size
-    Duration = 2,                       -- Number: Display duration (seconds)
-    Animation = "fade"                  -- String: Animation type
-}
-```
-
-## Sound System
-
-Mercury includes a customizable sound system for UI interactions.
-
-### Enable Sounds
-
-```lua
--- Enable sounds with default sound IDs
-Mercury:SetSounds(true)
-
--- Enable sounds with custom sound IDs
-Mercury:SetSounds(true, {
-    Click = 12221944,                   -- Button clicks
-    Toggle = 12221967,                  -- Toggle switches
-    Slider = 12221989,                  -- Slider adjustments
-    Dropdown = 12222008,                -- Dropdown selections
-    Notification = 12222015             -- Notifications
-})
-
--- Disable sounds
-Mercury:SetSounds(false)
-```
-
-### Custom Sound Configuration
-
-```lua
-local Window = Mercury:CreateWindow({
-    Name = "My Script"
-})
-
--- Configure sounds after window creation
-Mercury:SetSounds(true, {
-    Click = 3398620867,                 -- Custom click sound
-    Toggle = 3398620867,                -- Custom toggle sound
-    Slider = 3398620867,                -- Custom slider sound
-    Dropdown = 3398620867,              -- Custom dropdown sound
-    Notification = 3398620867           -- Custom notification sound
-})
-```
-
-### Manual Sound Playback
-
-```lua
--- Play specific sounds manually
-Mercury:PlaySound("Click")
-Mercury:PlaySound("Toggle")
-Mercury:PlaySound("Notification")
-
--- Note: Sounds only play when enabled via SetSounds(true)
-```
-
-### Sound IDs
-
-Find sound assets on the Roblox website and use their asset IDs:
-```
-rbxassetid://12345678 -> Use just the number: 12345678
-```
-
-Popular free-to-use sound asset IDs:
-- Click: 3398620867
-- Success: 6026984224
-- Error: 2865228021
-- Notification: 9086208751
 
 ## Advanced Control
 
