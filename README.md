@@ -10,18 +10,16 @@ Mercury Interactive is a clean, minimal UI library designed for Roblox script in
 
 ### Key Features
 
-- Instant Loading - No startup animations by default (customizable)
+- Instant Loading - No startup animations or loading screens
 - Seven Built-in Themes - Professional color schemes
 - Configuration System - Automatic saving and loading
 - Complete Control API - Full programmatic control over all elements
 - Mobile Compatible - Touch-friendly interface
-- Rich Element Library - Comprehensive UI components including CodeBox
+- Rich Element Library - Comprehensive UI components
 - Smooth Animations - Polished TweenService transitions
 - Keybind System - Custom hotkey support
 - Error Handling - Built-in callback error management
 - Dynamic Updates - Modify elements after creation
-- Custom Startup Screen - Optional branded loading screen
-- Sound Effects - Customizable UI interaction sounds
 
 ## Table of Contents
 
@@ -40,13 +38,13 @@ Mercury Interactive is a clean, minimal UI library designed for Roblox script in
 ## Installation
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
 ```
 
 ## Quick Start
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
 
 -- Create Window
 local Window = Mercury:CreateWindow({
@@ -677,7 +675,7 @@ Tab:CreateToggle({
 ### Example 1: Simple Script Hub
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
 
 local Window = Mercury:CreateWindow({
     Name = "Simple Hub",
@@ -719,7 +717,7 @@ MainTab:CreateButton({
 ### Example 2: Advanced Script with Configuration
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
 
 -- Global variables
 _G.AutoFarm = false
@@ -859,7 +857,7 @@ Mercury:LoadConfiguration()
 ### Example 3: Dynamic UI Updates
 
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInterface/main/Mercury.lua"))()
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/superfastisfast/MercuryInteractive/main/Mercury.lua"))()
 
 local Window = Mercury:CreateWindow({
     Name = "Dynamic UI Example"
@@ -1116,7 +1114,7 @@ Based on Rayfield Interface Suite by Sirius Software.
 
 ## Support
 
-For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInterface/issues).
+For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInteractive/issues).
 
 ## Changelog
 
@@ -1130,7 +1128,7 @@ For issues or questions, please open an issue on the [GitHub repository](https:/
 
 ---
 
-Repository: [github.com/superfastisfast/MercuryInterface](https://github.com/superfastisfast/MercuryInterface)
+Repository: [github.com/superfastisfast/MercuryInteractive](https://github.com/superfastisfast/MercuryInteractive)
 
 Documentation: [Full API Reference](#table-of-contents)
 
