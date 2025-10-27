@@ -1106,16 +1106,6 @@ Modifications include:
 - Improved error handling
 - Enhanced documentation
 
-## License
-
-MIT License - see LICENSE file for details.
-
-Based on Rayfield Interface Suite by Sirius Software.
-
-## Support
-
-For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInteractive/issues).
-
 ## Changelog
 
 ### Version 1.0.0
