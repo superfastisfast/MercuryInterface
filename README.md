@@ -1272,7 +1272,3 @@ All elements support:
 ✅ Error handling  
 ✅ Ripple effects  
 ✅ Hover animations  
-
----
-
-**Made with Mercury UI Library** 🚀
