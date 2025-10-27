@@ -1,3 +1,4 @@
+--[[
 	Mercury Interface Suite - Enhanced
 	Clean, minimal UI library with improved API control
 ]]
@@ -14,6 +15,7 @@ local TweenService = getService("TweenService")
 local Players = getService("Players")
 local CoreGui = getService("CoreGui")
 
+-- Configuration
 local MercuryFolder = "Mercury"
 local ConfigurationFolder = MercuryFolder.."/Configurations"
 local ConfigurationExtension = ".json"
@@ -21,6 +23,7 @@ local CFileName = nil
 local CEnabled = false
 local ErrorNotificationsEnabled = true
 
+-- Create folders if needed
 if isfolder and not isfolder(MercuryFolder) then
 	makefolder(MercuryFolder)
 end
@@ -31,6 +34,14 @@ end
 
 local MercuryLibrary = {
 	Flags = {},
+	Sounds = {
+		Enabled = false,
+		Click = nil,
+		Toggle = nil,
+		Slider = nil,
+		Dropdown = nil,
+		Notification = nil
+	},
 	Theme = {
 		Default = {
 			TextColor = Color3.fromRGB(240, 240, 240),
@@ -63,7 +74,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(65, 65, 65),
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
-
+		
 		Ocean = {
 			TextColor = Color3.fromRGB(230, 240, 240),
 			Background = Color3.fromRGB(20, 30, 30),
@@ -95,7 +106,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(50, 70, 70),
 			PlaceholderColor = Color3.fromRGB(140, 160, 160)
 		},
-
+		
 		Light = {
 			TextColor = Color3.fromRGB(40, 40, 40),
 			Background = Color3.fromRGB(245, 245, 245),
@@ -127,7 +138,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(180, 180, 180),
 			PlaceholderColor = Color3.fromRGB(140, 140, 140)
 		},
-
+		
 		Midnight = {
 			TextColor = Color3.fromRGB(200, 200, 220),
 			Background = Color3.fromRGB(15, 15, 25),
@@ -159,7 +170,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(50, 50, 70),
 			PlaceholderColor = Color3.fromRGB(120, 120, 140)
 		},
-
+		
 		Forest = {
 			TextColor = Color3.fromRGB(220, 240, 220),
 			Background = Color3.fromRGB(20, 30, 20),
@@ -191,7 +202,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(50, 70, 50),
 			PlaceholderColor = Color3.fromRGB(130, 150, 130)
 		},
-
+		
 		Sunset = {
 			TextColor = Color3.fromRGB(255, 240, 230),
 			Background = Color3.fromRGB(40, 25, 30),
@@ -223,7 +234,7 @@ local MercuryLibrary = {
 			InputStroke = Color3.fromRGB(80, 50, 65),
 			PlaceholderColor = Color3.fromRGB(180, 150, 160)
 		},
-
+		
 		Purple = {
 			TextColor = Color3.fromRGB(240, 230, 255),
 			Background = Color3.fromRGB(25, 20, 40),
@@ -271,6 +282,7 @@ local function ChangeTheme(Theme)
 	end
 end
 
+-- Utility Functions
 local function PackColor(Color)
 	return {R = Color.R * 255, G = Color.G * 255, B = Color.B * 255}
 end    
@@ -281,7 +293,7 @@ end
 
 local function SaveConfiguration()
 	if not CEnabled then return end
-
+	
 	local Data = {}
 	for i, v in pairs(MercuryLibrary.Flags) do
 		if v.Type == "ColorPicker" then
@@ -290,7 +302,7 @@ local function SaveConfiguration()
 			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
 		end
 	end
-
+	
 	if writefile then
 		writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, HttpService:JSONEncode(Data))
 	end
@@ -299,7 +311,7 @@ end
 local function LoadConfiguration(Configuration)
 	local success, Data = pcall(function() return HttpService:JSONDecode(Configuration) end)
 	if not success then return end
-
+	
 	for FlagName, Flag in pairs(MercuryLibrary.Flags) do
 		local FlagValue = Data[FlagName]
 		if FlagValue ~= nil then
@@ -326,7 +338,7 @@ function MercuryLibrary:Notify(Settings)
 		local Title = Settings.Title or "Notification"
 		local Content = Settings.Content or ""
 		local Duration = Settings.Duration or 3
-
+		
 		print("[Mercury] " .. Title .. ": " .. Content)
 	end)
 end
@@ -370,17 +382,19 @@ end
 
 function MercuryLibrary:CreateWindow(Settings)
 	Settings = Settings or {}
-
+	
+	-- Create UI
 	local Mercury = game:GetObjects("rbxassetid://10804731440")[1]
 	Mercury.Name = "Mercury"
 	Mercury.Enabled = false
-
+	
 	if gethui then
 		Mercury.Parent = gethui()
 	else
 		Mercury.Parent = CoreGui
 	end
-
+	
+	-- Remove old instances
 	if gethui then
 		for _, Interface in ipairs(gethui():GetChildren()) do
 			if Interface.Name == "Mercury" and Interface ~= Mercury then
@@ -388,26 +402,30 @@ function MercuryLibrary:CreateWindow(Settings)
 			end
 		end
 	end
-
+	
 	local Main = Mercury.Main
 	local Topbar = Main.Topbar
 	local Elements = Main.Elements
 	local TabList = Main.TabList
-
+	
+	-- Configure
 	Topbar.Title.Text = Settings.Name or "Mercury"
 	Mercury.Enabled = true
 	Main.Visible = true
-
+	
+	-- Configuration saving
 	if Settings.ConfigurationSaving then
 		CFileName = Settings.ConfigurationSaving.FileName or tostring(game.PlaceId)
 		CEnabled = Settings.ConfigurationSaving.Enabled or false
 	end
-
+	
+	-- Window object
 	local Window = {
 		Tabs = {},
 		CurrentTab = nil
 	}
-
+	
+	-- Theme management
 	function Window:SetTheme(ThemeName)
 		if typeof(ThemeName) == 'string' and MercuryLibrary.Theme[ThemeName] then
 			ChangeTheme(ThemeName)
@@ -415,26 +433,28 @@ function MercuryLibrary:CreateWindow(Settings)
 			Topbar.BackgroundColor3 = SelectedTheme.Topbar
 		end
 	end
-
+	
+	-- Visibility control
 	function Window:Toggle()
 		Hidden = not Hidden
 		Mercury.Enabled = not Hidden
 	end
-
+	
 	function Window:Show()
 		Hidden = false
 		Mercury.Enabled = true
 	end
-
+	
 	function Window:Hide()
 		Hidden = true
 		Mercury.Enabled = false
 	end
-
+	
 	function Window:IsVisible()
 		return not Hidden
 	end
-
+	
+	-- Size control
 	function Window:Minimize()
 		if Minimized then return end
 		Minimized = true
@@ -442,7 +462,7 @@ function MercuryLibrary:CreateWindow(Settings)
 			Size = UDim2.new(0, 500, 0, 45)
 		}):Play()
 	end
-
+	
 	function Window:Maximize()
 		if not Minimized then return end
 		Minimized = false
@@ -450,25 +470,29 @@ function MercuryLibrary:CreateWindow(Settings)
 			Size = UDim2.new(0, 500, 0, 475)
 		}):Play()
 	end
-
+	
 	function Window:IsMinimized()
 		return Minimized
 	end
-
+	
+	-- Destroy window
 	function Window:Destroy()
 		Mercury:Destroy()
 	end
-
+	
+	-- Get all tabs
 	function Window:GetTabs()
 		return Window.Tabs
 	end
-
+	
+	-- Select tab by name
 	function Window:SelectTab(TabName)
 		for _, tab in pairs(Window.Tabs) do
 			if tab.Name == TabName then
 				Elements.UIPageLayout:JumpTo(tab.Page)
 				Window.CurrentTab = tab
-
+				
+				-- Update tab button visuals
 				for _, btn in ipairs(TabList:GetChildren()) do
 					if btn:IsA("Frame") and btn.Name ~= "Template" then
 						if btn.Name == TabName then
@@ -485,7 +509,8 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		return false
 	end
-
+	
+	-- Keybind for toggling UI
 	if Settings.ToggleKey then
 		UserInputService.InputBegan:Connect(function(input, processed)
 			if processed then return end
@@ -494,190 +519,197 @@ function MercuryLibrary:CreateWindow(Settings)
 			end
 		end)
 	end
-
+	
 	function Window:CreateTab(Name, Icon)
 		local Tab = {
 			Name = Name,
 			Elements = {},
 			Window = Window
 		}
-
+		
+		-- Create tab button
 		local TabButton = TabList.Template:Clone()
 		TabButton.Name = Name
 		TabButton.Title.Text = Name
 		TabButton.Visible = true
 		TabButton.Parent = TabList
-
+		
+		-- Create tab page
 		local TabPage = Elements.Template:Clone()
 		TabPage.Name = Name
 		TabPage.Visible = true
 		TabPage.Parent = Elements
-
+		
 		Tab.Button = TabButton
 		Tab.Page = TabPage
-
+		
+		-- Store tab reference
 		table.insert(Window.Tabs, Tab)
-
+		
+		-- Tab button click
 		TabButton.Interact.MouseButton1Click:Connect(function()
 			Window:SelectTab(Name)
 		end)
-
+		
+		-- Auto-select first tab
 		if #Window.Tabs == 1 then
 			Window:SelectTab(Name)
 		end
-
+		
+		-- Get all elements in this tab
 		function Tab:GetElements()
 			return Tab.Elements
 		end
-
+		
+		-- Elements
 		function Tab:CreateLabel(Text, Icon, Color)
 			local Label = Elements.Template.Label:Clone()
 			Label.Title.Text = Text
 			Label.Visible = true
 			Label.Parent = TabPage
-
+			
 			if Color then
 				Label.BackgroundColor3 = Color
 			end
-
+			
 			local LabelValue = {
 				Type = "Label",
 				Element = Label
 			}
-
+			
 			function LabelValue:Set(NewText, NewColor)
 				Label.Title.Text = NewText
 				if NewColor then
 					Label.BackgroundColor3 = NewColor
 				end
 			end
-
+			
 			function LabelValue:Remove()
 				Label:Destroy()
 			end
-
+			
 			table.insert(Tab.Elements, LabelValue)
 			return LabelValue
 		end
-
+		
 		function Tab:CreateSection(SectionName)
 			local Section = Elements.Template.SectionTitle:Clone()
 			Section.Title.Text = SectionName
 			Section.Visible = true
 			Section.Parent = TabPage
-
+			
 			local SectionValue = {
 				Type = "Section",
 				Element = Section
 			}
-
+			
 			function SectionValue:Set(NewName)
 				Section.Title.Text = NewName
 			end
-
+			
 			function SectionValue:Remove()
 				Section:Destroy()
 			end
-
+			
 			table.insert(Tab.Elements, SectionValue)
 			return SectionValue
 		end
-
+		
 		function Tab:CreateParagraph(ParagraphSettings)
 			local Paragraph = Elements.Template.Paragraph:Clone()
 			Paragraph.Title.Text = ParagraphSettings.Title
 			Paragraph.Content.Text = ParagraphSettings.Content
 			Paragraph.Visible = true
 			Paragraph.Parent = TabPage
-
+			
 			local ParagraphValue = {
 				Type = "Paragraph",
 				Element = Paragraph
 			}
-
+			
 			function ParagraphValue:Set(NewSettings)
 				Paragraph.Title.Text = NewSettings.Title
 				Paragraph.Content.Text = NewSettings.Content
 			end
-
+			
 			function ParagraphValue:Remove()
 				Paragraph:Destroy()
 			end
-
+			
 			table.insert(Tab.Elements, ParagraphValue)
 			return ParagraphValue
 		end
-
+		
 		function Tab:CreateDivider()
 			local Divider = Elements.Template.Divider:Clone()
 			Divider.Visible = true
 			Divider.Parent = TabPage
-
+			
 			local DividerValue = {
 				Type = "Divider",
 				Element = Divider
 			}
-
+			
 			function DividerValue:Set(Visible)
 				Divider.Visible = Visible
 			end
-
+			
 			function DividerValue:Remove()
 				Divider:Destroy()
 			end
-
+			
 			table.insert(Tab.Elements, DividerValue)
 			return DividerValue
 		end
-
+		
 		function Tab:CreateButton(ButtonSettings)
 			local Button = Elements.Template.Button:Clone()
 			Button.Name = ButtonSettings.Name
 			Button.Title.Text = ButtonSettings.Name
 			Button.Visible = true
 			Button.Parent = TabPage
-
+			
 			Button.Interact.MouseButton1Click:Connect(function()
 				local success, err = pcall(ButtonSettings.Callback)
 				if not success then
 					ShowError(ButtonSettings.Name, err)
 				end
 			end)
-
+			
 			local ButtonValue = {
 				Type = "Button",
 				Element = Button
 			}
-
+			
 			function ButtonValue:Set(NewName)
 				Button.Title.Text = NewName
 				Button.Name = NewName
 			end
-
+			
 			function ButtonValue:SetCallback(NewCallback)
 				ButtonSettings.Callback = NewCallback
 			end
-
+			
 			function ButtonValue:Remove()
 				Button:Destroy()
 			end
-
+			
 			table.insert(Tab.Elements, ButtonValue)
 			return ButtonValue
 		end
-
+		
 		function Tab:CreateToggle(ToggleSettings)
 			local Toggle = Elements.Template.Toggle:Clone()
 			Toggle.Name = ToggleSettings.Name
 			Toggle.Title.Text = ToggleSettings.Name
 			Toggle.Visible = true
 			Toggle.Parent = TabPage
-
+			
 			ToggleSettings.CurrentValue = ToggleSettings.CurrentValue or false
 			ToggleSettings.Type = "Toggle"
-
+			
 			local function UpdateVisual()
-
+				-- Update toggle visual appearance based on state
 				local ToggleFrame = Toggle:FindFirstChild("ToggleFrame")
 				if ToggleFrame then
 					local Indicator = ToggleFrame:FindFirstChild("Indicator")
@@ -690,7 +722,7 @@ function MercuryLibrary:CreateWindow(Settings)
 					end
 				end
 			end
-
+			
 			Toggle.Interact.MouseButton1Click:Connect(function()
 				ToggleSettings.CurrentValue = not ToggleSettings.CurrentValue
 				UpdateVisual()
@@ -700,7 +732,7 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end)
-
+			
 			function ToggleSettings:Set(Value)
 				ToggleSettings.CurrentValue = Value
 				UpdateVisual()
@@ -710,85 +742,85 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end
-
+			
 			function ToggleSettings:Get()
 				return ToggleSettings.CurrentValue
 			end
-
+			
 			function ToggleSettings:SetCallback(NewCallback)
 				ToggleSettings.Callback = NewCallback
 			end
-
+			
 			function ToggleSettings:Remove()
 				Toggle:Destroy()
 			end
-
+			
 			ToggleSettings.Element = Toggle
 			UpdateVisual()
-
+			
 			if ToggleSettings.Flag then
 				MercuryLibrary.Flags[ToggleSettings.Flag] = ToggleSettings
 			end
-
+			
 			table.insert(Tab.Elements, ToggleSettings)
 			return ToggleSettings
 		end
-
+		
 		function Tab:CreateSlider(SliderSettings)
 			local Slider = Elements.Template.Slider:Clone()
 			Slider.Name = SliderSettings.Name
 			Slider.Title.Text = SliderSettings.Name
 			Slider.Visible = true
 			Slider.Parent = TabPage
-
+			
 			SliderSettings.CurrentValue = SliderSettings.CurrentValue or SliderSettings.Range[1]
 			SliderSettings.Range = SliderSettings.Range or {0, 100}
 			SliderSettings.Increment = SliderSettings.Increment or 1
 			SliderSettings.Type = "Slider"
-
+			
 			local Dragging = false
 			local SliderMain = Slider.Main
 			local Progress = SliderMain.Progress
 			local Info = SliderMain.Information
-
+			
 			local function UpdateSlider(Value)
 				local Percentage = (Value - SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])
 				Progress.Size = UDim2.new(Percentage, 0, 1, 0)
-
+				
 				if SliderSettings.Suffix then
 					Info.Text = tostring(Value) .. " " .. SliderSettings.Suffix
 				else
 					Info.Text = tostring(Value)
 				end
-
+				
 				SliderSettings.CurrentValue = Value
 			end
-
+			
 			UpdateSlider(SliderSettings.CurrentValue)
-
+			
 			SliderMain.Interact.InputBegan:Connect(function(input)
 				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 					Dragging = true
 				end
 			end)
-
+			
 			SliderMain.Interact.InputEnded:Connect(function(input)
 				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 					Dragging = false
 				end
 			end)
-
+			
 			UserInputService.InputChanged:Connect(function(input)
 				if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 					local MousePos = UserInputService:GetMouseLocation().X
 					local SliderPos = SliderMain.AbsolutePosition.X
 					local SliderSize = SliderMain.AbsoluteSize.X
-
+					
 					local Percentage = math.clamp((MousePos - SliderPos) / SliderSize, 0, 1)
 					local Value = SliderSettings.Range[1] + (Percentage * (SliderSettings.Range[2] - SliderSettings.Range[1]))
 					Value = math.floor(Value / SliderSettings.Increment + 0.5) * SliderSettings.Increment
 					Value = math.clamp(Value, SliderSettings.Range[1], SliderSettings.Range[2])
-
+					
 					UpdateSlider(Value)
 					local success, err = pcall(SliderSettings.Callback, Value)
 					if not success then
@@ -797,7 +829,7 @@ function MercuryLibrary:CreateWindow(Settings)
 					SaveConfiguration()
 				end
 			end)
-
+			
 			function SliderSettings:Set(Value)
 				Value = math.clamp(Value, SliderSettings.Range[1], SliderSettings.Range[2])
 				UpdateSlider(Value)
@@ -807,55 +839,55 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end
-
+			
 			function SliderSettings:Get()
 				return SliderSettings.CurrentValue
 			end
-
+			
 			function SliderSettings:SetCallback(NewCallback)
 				SliderSettings.Callback = NewCallback
 			end
-
+			
 			function SliderSettings:SetRange(NewRange)
 				SliderSettings.Range = NewRange
 				SliderSettings.CurrentValue = math.clamp(SliderSettings.CurrentValue, NewRange[1], NewRange[2])
 				UpdateSlider(SliderSettings.CurrentValue)
 			end
-
+			
 			function SliderSettings:Remove()
 				Slider:Destroy()
 			end
-
+			
 			SliderSettings.Element = Slider
-
+			
 			if SliderSettings.Flag then
 				MercuryLibrary.Flags[SliderSettings.Flag] = SliderSettings
 			end
-
+			
 			table.insert(Tab.Elements, SliderSettings)
 			return SliderSettings
 		end
-
+		
 		function Tab:CreateDropdown(DropdownSettings)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			Dropdown.Name = DropdownSettings.Name
 			Dropdown.Title.Text = DropdownSettings.Name
 			Dropdown.Visible = true
 			Dropdown.Parent = TabPage
-
+			
 			DropdownSettings.CurrentOption = DropdownSettings.CurrentOption or {}
 			DropdownSettings.Options = DropdownSettings.Options or {}
 			DropdownSettings.MultipleOptions = DropdownSettings.MultipleOptions or false
 			DropdownSettings.Type = "Dropdown"
-
+			
 			if type(DropdownSettings.CurrentOption) == "string" then
 				DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
 			end
-
+			
 			local DropdownList = Dropdown.List
 			local Selected = Dropdown.Selected
 			local IsOpen = false
-
+			
 			local function UpdateText()
 				if #DropdownSettings.CurrentOption == 0 then
 					Selected.Text = "None"
@@ -865,23 +897,25 @@ function MercuryLibrary:CreateWindow(Settings)
 					Selected.Text = "Multiple"
 				end
 			end
-
+			
 			UpdateText()
 			DropdownList.Visible = false
-
+			
+			-- Clear existing options
 			for _, child in ipairs(DropdownList:GetChildren()) do
 				if child:IsA("Frame") and child.Name ~= "Template" then
 					child:Destroy()
 				end
 			end
-
+			
+			-- Create options
 			for _, option in ipairs(DropdownSettings.Options) do
 				local OptionFrame = DropdownList.Template:Clone()
 				OptionFrame.Name = option
 				OptionFrame.Title.Text = option
 				OptionFrame.Visible = true
 				OptionFrame.Parent = DropdownList
-
+				
 				OptionFrame.Interact.MouseButton1Click:Connect(function()
 					if table.find(DropdownSettings.CurrentOption, option) then
 						table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, option))
@@ -891,31 +925,31 @@ function MercuryLibrary:CreateWindow(Settings)
 						end
 						table.insert(DropdownSettings.CurrentOption, option)
 					end
-
+					
 					UpdateText()
 					local success, err = pcall(DropdownSettings.Callback, DropdownSettings.CurrentOption)
 					if not success then
 						ShowError(DropdownSettings.Name, err)
 					end
 					SaveConfiguration()
-
+					
 					if not DropdownSettings.MultipleOptions then
 						DropdownList.Visible = false
 						IsOpen = false
 					end
 				end)
 			end
-
+			
 			Dropdown.Interact.MouseButton1Click:Connect(function()
 				IsOpen = not IsOpen
 				DropdownList.Visible = IsOpen
 			end)
-
+			
 			function DropdownSettings:Set(Option)
 				if type(Option) == "string" then
 					Option = {Option}
 				end
-
+				
 				DropdownSettings.CurrentOption = Option
 				UpdateText()
 				local success, err = pcall(DropdownSettings.Callback, Option)
@@ -924,31 +958,32 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end
-
+			
 			function DropdownSettings:Get()
 				return DropdownSettings.CurrentOption
 			end
-
+			
 			function DropdownSettings:SetCallback(NewCallback)
 				DropdownSettings.Callback = NewCallback
 			end
-
+			
 			function DropdownSettings:Refresh(NewOptions)
 				DropdownSettings.Options = NewOptions
-
+				
+				-- Clear and recreate options
 				for _, child in ipairs(DropdownList:GetChildren()) do
 					if child:IsA("Frame") and child.Name ~= "Template" then
 						child:Destroy()
 					end
 				end
-
+				
 				for _, option in ipairs(NewOptions) do
 					local OptionFrame = DropdownList.Template:Clone()
 					OptionFrame.Name = option
 					OptionFrame.Title.Text = option
 					OptionFrame.Visible = true
 					OptionFrame.Parent = DropdownList
-
+					
 					OptionFrame.Interact.MouseButton1Click:Connect(function()
 						if table.find(DropdownSettings.CurrentOption, option) then
 							table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, option))
@@ -958,14 +993,14 @@ function MercuryLibrary:CreateWindow(Settings)
 							end
 							table.insert(DropdownSettings.CurrentOption, option)
 						end
-
+						
 						UpdateText()
 						local success, err = pcall(DropdownSettings.Callback, DropdownSettings.CurrentOption)
 						if not success then
 							ShowError(DropdownSettings.Name, err)
 						end
 						SaveConfiguration()
-
+						
 						if not DropdownSettings.MultipleOptions then
 							DropdownList.Visible = false
 							IsOpen = false
@@ -973,34 +1008,34 @@ function MercuryLibrary:CreateWindow(Settings)
 					end)
 				end
 			end
-
+			
 			function DropdownSettings:Remove()
 				Dropdown:Destroy()
 			end
-
+			
 			DropdownSettings.Element = Dropdown
-
+			
 			if DropdownSettings.Flag then
 				MercuryLibrary.Flags[DropdownSettings.Flag] = DropdownSettings
 			end
-
+			
 			table.insert(Tab.Elements, DropdownSettings)
 			return DropdownSettings
 		end
-
+		
 		function Tab:CreateInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
 			Input.Name = InputSettings.Name
 			Input.Title.Text = InputSettings.Name
 			Input.Visible = true
 			Input.Parent = TabPage
-
+			
 			InputSettings.CurrentValue = InputSettings.CurrentValue or ""
 			InputSettings.Type = "Input"
 			InputSettings.Placeholder = InputSettings.Placeholder or "Enter text..."
-
+			
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.Placeholder
-
+			
 			Input.InputFrame.InputBox.FocusLost:Connect(function()
 				InputSettings.CurrentValue = Input.InputFrame.InputBox.Text
 				local success, err = pcall(InputSettings.Callback, InputSettings.CurrentValue)
@@ -1009,7 +1044,7 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end)
-
+			
 			function InputSettings:Set(Text)
 				Input.InputFrame.InputBox.Text = Text
 				InputSettings.CurrentValue = Text
@@ -1019,58 +1054,58 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end
-
+			
 			function InputSettings:Get()
 				return InputSettings.CurrentValue
 			end
-
+			
 			function InputSettings:SetCallback(NewCallback)
 				InputSettings.Callback = NewCallback
 			end
-
+			
 			function InputSettings:SetPlaceholder(NewPlaceholder)
 				Input.InputFrame.InputBox.PlaceholderText = NewPlaceholder
 			end
-
+			
 			function InputSettings:Remove()
 				Input:Destroy()
 			end
-
+			
 			InputSettings.Element = Input
-
+			
 			if InputSettings.Flag then
 				MercuryLibrary.Flags[InputSettings.Flag] = InputSettings
 			end
-
+			
 			table.insert(Tab.Elements, InputSettings)
 			return InputSettings
 		end
-
+		
 		function Tab:CreateKeybind(KeybindSettings)
 			local Keybind = Elements.Template.Keybind:Clone()
 			Keybind.Name = KeybindSettings.Name
 			Keybind.Title.Text = KeybindSettings.Name
 			Keybind.Visible = true
 			Keybind.Parent = TabPage
-
+			
 			KeybindSettings.CurrentKeybind = KeybindSettings.CurrentKeybind or "None"
 			KeybindSettings.Type = "Keybind"
 			Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
-
+			
 			local CheckingForKey = false
-
+			
 			Keybind.KeybindFrame.KeybindBox.Focused:Connect(function()
 				CheckingForKey = true
 				Keybind.KeybindFrame.KeybindBox.Text = "..."
 			end)
-
+			
 			Keybind.KeybindFrame.KeybindBox.FocusLost:Connect(function()
 				CheckingForKey = false
 				if Keybind.KeybindFrame.KeybindBox.Text == "..." then
 					Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
 				end
 			end)
-
+			
 			UserInputService.InputBegan:Connect(function(input, processed)
 				if CheckingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
 					local NewKey = input.KeyCode.Name
@@ -1085,52 +1120,52 @@ function MercuryLibrary:CreateWindow(Settings)
 					end
 				end
 			end)
-
+			
 			function KeybindSettings:Set(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox.Text = NewKeybind
 				KeybindSettings.CurrentKeybind = NewKeybind
 				SaveConfiguration()
 			end
-
+			
 			function KeybindSettings:Get()
 				return KeybindSettings.CurrentKeybind
 			end
-
+			
 			function KeybindSettings:SetCallback(NewCallback)
 				KeybindSettings.Callback = NewCallback
 			end
-
+			
 			function KeybindSettings:Remove()
 				Keybind:Destroy()
 			end
-
+			
 			KeybindSettings.Element = Keybind
-
+			
 			if KeybindSettings.Flag then
 				MercuryLibrary.Flags[KeybindSettings.Flag] = KeybindSettings
 			end
-
+			
 			table.insert(Tab.Elements, KeybindSettings)
 			return KeybindSettings
 		end
-
+		
 		function Tab:CreateColorPicker(ColorPickerSettings)
 			local ColorPicker = Elements.Template.ColorPicker:Clone()
 			ColorPicker.Name = ColorPickerSettings.Name
 			ColorPicker.Title.Text = ColorPickerSettings.Name
 			ColorPicker.Visible = true
 			ColorPicker.Parent = TabPage
-
+			
 			ColorPickerSettings.Color = ColorPickerSettings.Color or Color3.fromRGB(255, 255, 255)
 			ColorPickerSettings.Type = "ColorPicker"
-
+			
 			local Display = ColorPicker.CPBackground.Display
 			Display.BackgroundColor3 = ColorPickerSettings.Color
-
+			
 			ColorPicker.Interact.MouseButton1Click:Connect(function()
-
+				-- Toggle color picker interface (simplified for now)
 			end)
-
+			
 			function ColorPickerSettings:Set(NewColor)
 				ColorPickerSettings.Color = NewColor
 				Display.BackgroundColor3 = NewColor
@@ -1140,29 +1175,30 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 				SaveConfiguration()
 			end
-
+			
 			function ColorPickerSettings:Get()
 				return ColorPickerSettings.Color
 			end
-
+			
 			function ColorPickerSettings:SetCallback(NewCallback)
 				ColorPickerSettings.Callback = NewCallback
 			end
-
+			
 			function ColorPickerSettings:Remove()
 				ColorPicker:Destroy()
 			end
-
+			
 			ColorPickerSettings.Element = ColorPicker
-
+			
 			if ColorPickerSettings.Flag then
 				MercuryLibrary.Flags[ColorPickerSettings.Flag] = ColorPickerSettings
 			end
-
+			
 			table.insert(Tab.Elements, ColorPickerSettings)
 			return ColorPickerSettings
 		end
-
+		
+		-- Remove tab function
 		function Tab:Remove()
 			TabButton:Destroy()
 			TabPage:Destroy()
@@ -1173,14 +1209,15 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 			end
 		end
-
+		
 		return Tab
 	end
-
+	
+	-- Auto-load configuration after 1 second
 	task.delay(1, function()
 		MercuryLibrary:LoadConfiguration()
 	end)
-
+	
 	return Window
 end
 
