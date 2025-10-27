@@ -1,25 +1,4 @@
---[[
-	Mercury Interface Suite - Enhanced & Production Ready
-	Feature-complete UI library with advanced functionality
-	
-	New Features:
-	- Full drag support with smooth tweening
-	- Animated transitions for all elements
-	- Complete color picker with HSV selector
-	- Search functionality for dropdowns
-	- Element tooltips
-	- Custom element positioning
-	- Element groups/containers
-	- Progress bars
-	- Image buttons
-	- Multi-line text inputs
-	- Element visibility toggling
-	- Advanced keybind system with modifier keys
-	- Element locking/unlocking
-	- Custom animations
-	- Element cloning
-	- Batch operations
-]]
+
 
 local function getService(name)
 	local service = game:GetService(name)
