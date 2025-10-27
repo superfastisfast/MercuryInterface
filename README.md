@@ -1,4 +1,4 @@
-# Mercury Interactive
+# Mercury Interface
 
 A modern UI library for Roblox scripts, based on Rayfield Interface Suite.
 
@@ -6,7 +6,7 @@ A modern UI library for Roblox scripts, based on Rayfield Interface Suite.
 
 ## Overview
 
-Mercury Interactive is a clean, minimal UI library designed for Roblox script interfaces. Built on the foundation of Rayfield Interface Suite, Mercury removes unnecessary startup sequences and branding while maintaining full functionality and adding enhanced control features.
+Mercury Interface is a clean, minimal UI library designed for Roblox script interfaces. Built on the foundation of Rayfield Interface Suite, Mercury removes unnecessary startup sequences and branding while maintaining full functionality and adding enhanced control features.
 
 ### Key Features
 
@@ -1091,7 +1091,7 @@ Mercury:LoadConfiguration()            -- Manually load saved configuration
 
 ## Credits
 
-Mercury Interactive is based on [Rayfield Interface Suite](https://github.com/shlexware/Rayfield) by Sirius Software.
+Mercury Interface is based on [Rayfield Interface Suite](https://github.com/shlexware/Rayfield) by Sirius Software.
 
 Modifications include:
 - Removed startup sequences and loading screens
@@ -1114,7 +1114,7 @@ Based on Rayfield Interface Suite by Sirius Software.
 
 ## Support
 
-For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInteractive/issues).
+For issues or questions, please open an issue on the [GitHub repository](https://github.com/superfastisfast/MercuryInterface/issues).
 
 ## Changelog
 
@@ -1128,7 +1128,7 @@ For issues or questions, please open an issue on the [GitHub repository](https:/
 
 ---
 
-Repository: [github.com/superfastisfast/MercuryInteractive](https://github.com/superfastisfast/MercuryInteractive)
+Repository: [github.com/superfastisfast/MercuryInterface](https://github.com/superfastisfast/MercuryInterface)
 
 Documentation: [Full API Reference](#table-of-contents)
 
