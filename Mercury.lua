@@ -1,5 +1,4 @@
 
-
 local function getService(name)
 	local service = game:GetService(name)
 	return if cloneref then cloneref(service) else service
@@ -21,7 +20,7 @@ local CEnabled = false
 local ErrorNotificationsEnabled = true
 
 -- Animation Settings
-local AnimationSpeed = 0.3
+local AnimationSpeed = 0.25
 local AnimationStyle = Enum.EasingStyle.Quart
 local AnimationDirection = Enum.EasingDirection.Out
 
@@ -37,14 +36,8 @@ end
 local MercuryLibrary = {
 	Flags = {},
 	Notifications = {},
-	Sounds = {
-		Enabled = false,
-		Click = nil,
-		Toggle = nil,
-		Slider = nil,
-		Dropdown = nil,
-		Notification = nil
-	},
+	Windows = {}, -- Track all Mercury windows
+	DetectedGUIs = {}, -- Track non-Mercury GUIs
 	Theme = {
 		Default = {
 			TextColor = Color3.fromRGB(240, 240, 240),
@@ -61,7 +54,7 @@ local MercuryLibrary = {
 			SecondaryElementBackground = Color3.fromRGB(25, 25, 25),
 			ElementStroke = Color3.fromRGB(50, 50, 50),
 			SecondaryElementStroke = Color3.fromRGB(40, 40, 40),
-			SliderBackground = Color3.fromRGB(50, 138, 220),
+			SliderBackground = Color3.fromRGB(43, 43, 43),
 			SliderProgress = Color3.fromRGB(50, 138, 220),
 			SliderStroke = Color3.fromRGB(58, 163, 255),
 			ToggleBackground = Color3.fromRGB(30, 30, 30),
@@ -81,374 +74,120 @@ local MercuryLibrary = {
 			SuccessColor = Color3.fromRGB(50, 220, 100),
 			WarningColor = Color3.fromRGB(220, 180, 50)
 		},
-
+		
 		Ocean = {
-			TextColor = Color3.fromRGB(235, 245, 250),
-			Background = Color3.fromRGB(15, 30, 40),
-			Topbar = Color3.fromRGB(10, 50, 70),
-			Shadow = Color3.fromRGB(6, 12, 18),
-			TabBackground = Color3.fromRGB(60, 100, 120),
-			TabStroke = Color3.fromRGB(70, 110, 140),
-			TabBackgroundSelected = Color3.fromRGB(200, 230, 240),
-			TabTextColor = Color3.fromRGB(230, 245, 255),
-			SelectedTabTextColor = Color3.fromRGB(20, 30, 40),
-			ElementBackground = Color3.fromRGB(30, 50, 60),
-			ElementBackgroundHover = Color3.fromRGB(40, 70, 90),
-			SecondaryElementBackground = Color3.fromRGB(18, 30, 36),
-			ElementStroke = Color3.fromRGB(50, 80, 100),
-			SecondaryElementStroke = Color3.fromRGB(40, 60, 80),
-			SliderBackground = Color3.fromRGB(0, 170, 200),
-			SliderProgress = Color3.fromRGB(0, 170, 200),
-			SliderStroke = Color3.fromRGB(0, 200, 255),
-			ToggleBackground = Color3.fromRGB(22, 34, 40),
-			ToggleEnabled = Color3.fromRGB(0, 170, 200),
-			ToggleDisabled = Color3.fromRGB(100, 100, 100),
-			ToggleEnabledStroke = Color3.fromRGB(0, 200, 255),
-			ToggleDisabledStroke = Color3.fromRGB(125, 125, 125),
-			ToggleEnabledOuterStroke = Color3.fromRGB(40, 70, 80),
-			ToggleDisabledOuterStroke = Color3.fromRGB(30, 45, 50),
-			DropdownSelected = Color3.fromRGB(28, 44, 54),
-			DropdownUnselected = Color3.fromRGB(22, 34, 42),
-			InputBackground = Color3.fromRGB(20, 34, 40),
-			InputStroke = Color3.fromRGB(40, 70, 80),
-			PlaceholderColor = Color3.fromRGB(160, 180, 190),
-			AccentColor = Color3.fromRGB(0, 170, 200),
-			ErrorColor = Color3.fromRGB(220, 50, 50),
-			SuccessColor = Color3.fromRGB(60, 200, 110),
-			WarningColor = Color3.fromRGB(220, 180, 50)
+			TextColor = Color3.fromRGB(230, 240, 240),
+			Background = Color3.fromRGB(20, 30, 30),
+			Topbar = Color3.fromRGB(25, 40, 40),
+			Shadow = Color3.fromRGB(15, 20, 20),
+			TabBackground = Color3.fromRGB(40, 60, 60),
+			TabStroke = Color3.fromRGB(50, 70, 70),
+			TabBackgroundSelected = Color3.fromRGB(100, 180, 180),
+			TabTextColor = Color3.fromRGB(210, 230, 230),
+			SelectedTabTextColor = Color3.fromRGB(20, 50, 50),
+			ElementBackground = Color3.fromRGB(30, 50, 50),
+			ElementBackgroundHover = Color3.fromRGB(40, 60, 60),
+			SecondaryElementBackground = Color3.fromRGB(30, 45, 45),
+			ElementStroke = Color3.fromRGB(45, 70, 70),
+			SecondaryElementStroke = Color3.fromRGB(40, 65, 65),
+			SliderBackground = Color3.fromRGB(35, 55, 55),
+			SliderProgress = Color3.fromRGB(0, 140, 140),
+			SliderStroke = Color3.fromRGB(0, 160, 160),
+			ToggleBackground = Color3.fromRGB(30, 50, 50),
+			ToggleEnabled = Color3.fromRGB(0, 130, 130),
+			ToggleDisabled = Color3.fromRGB(70, 90, 90),
+			ToggleEnabledStroke = Color3.fromRGB(0, 160, 160),
+			ToggleDisabledStroke = Color3.fromRGB(85, 105, 105),
+			ToggleEnabledOuterStroke = Color3.fromRGB(50, 100, 100),
+			ToggleDisabledOuterStroke = Color3.fromRGB(45, 65, 65),
+			DropdownSelected = Color3.fromRGB(30, 60, 60),
+			DropdownUnselected = Color3.fromRGB(25, 40, 40),
+			InputBackground = Color3.fromRGB(30, 50, 50),
+			InputStroke = Color3.fromRGB(50, 70, 70),
+			PlaceholderColor = Color3.fromRGB(140, 160, 160),
+			AccentColor = Color3.fromRGB(0, 140, 140),
+			ErrorColor = Color3.fromRGB(220, 80, 80),
+			SuccessColor = Color3.fromRGB(50, 200, 150),
+			WarningColor = Color3.fromRGB(220, 180, 80)
 		},
-
+		
 		Light = {
-			TextColor = Color3.fromRGB(25, 25, 25),
+			TextColor = Color3.fromRGB(40, 40, 40),
 			Background = Color3.fromRGB(245, 245, 245),
 			Topbar = Color3.fromRGB(230, 230, 230),
 			Shadow = Color3.fromRGB(200, 200, 200),
-			TabBackground = Color3.fromRGB(220, 220, 220),
-			TabStroke = Color3.fromRGB(200, 200, 200),
-			TabBackgroundSelected = Color3.fromRGB(30, 120, 200),
-			TabTextColor = Color3.fromRGB(25, 25, 25),
-			SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
-			ElementBackground = Color3.fromRGB(255, 255, 255),
-			ElementBackgroundHover = Color3.fromRGB(245, 245, 245),
-			SecondaryElementBackground = Color3.fromRGB(250, 250, 250),
-			ElementStroke = Color3.fromRGB(200, 200, 200),
-			SecondaryElementStroke = Color3.fromRGB(230, 230, 230),
-			SliderBackground = Color3.fromRGB(30, 120, 200),
-			SliderProgress = Color3.fromRGB(30, 120, 200),
-			SliderStroke = Color3.fromRGB(50, 160, 240),
-			ToggleBackground = Color3.fromRGB(240, 240, 240),
-			ToggleEnabled = Color3.fromRGB(30, 120, 200),
-			ToggleDisabled = Color3.fromRGB(180, 180, 180),
-			ToggleEnabledStroke = Color3.fromRGB(50, 160, 240),
-			ToggleDisabledStroke = Color3.fromRGB(150, 150, 150),
-			ToggleEnabledOuterStroke = Color3.fromRGB(200, 200, 200),
-			ToggleDisabledOuterStroke = Color3.fromRGB(220, 220, 220),
-			DropdownSelected = Color3.fromRGB(245, 245, 245),
-			DropdownUnselected = Color3.fromRGB(240, 240, 240),
-			InputBackground = Color3.fromRGB(255, 255, 255),
-			InputStroke = Color3.fromRGB(210, 210, 210),
+			TabBackground = Color3.fromRGB(235, 235, 235),
+			TabStroke = Color3.fromRGB(215, 215, 215),
+			TabBackgroundSelected = Color3.fromRGB(255, 255, 255),
+			TabTextColor = Color3.fromRGB(80, 80, 80),
+			SelectedTabTextColor = Color3.fromRGB(0, 0, 0),
+			ElementBackground = Color3.fromRGB(240, 240, 240),
+			ElementBackgroundHover = Color3.fromRGB(225, 225, 225),
+			SecondaryElementBackground = Color3.fromRGB(235, 235, 235),
+			ElementStroke = Color3.fromRGB(210, 210, 210),
+			SecondaryElementStroke = Color3.fromRGB(210, 210, 210),
+			SliderBackground = Color3.fromRGB(220, 220, 220),
+			SliderProgress = Color3.fromRGB(100, 150, 200),
+			SliderStroke = Color3.fromRGB(120, 170, 220),
+			ToggleBackground = Color3.fromRGB(220, 220, 220),
+			ToggleEnabled = Color3.fromRGB(0, 146, 214),
+			ToggleDisabled = Color3.fromRGB(150, 150, 150),
+			ToggleEnabledStroke = Color3.fromRGB(0, 170, 255),
+			ToggleDisabledStroke = Color3.fromRGB(170, 170, 170),
+			ToggleEnabledOuterStroke = Color3.fromRGB(100, 100, 100),
+			ToggleDisabledOuterStroke = Color3.fromRGB(180, 180, 180),
+			DropdownSelected = Color3.fromRGB(230, 230, 230),
+			DropdownUnselected = Color3.fromRGB(220, 220, 220),
+			InputBackground = Color3.fromRGB(240, 240, 240),
+			InputStroke = Color3.fromRGB(180, 180, 180),
 			PlaceholderColor = Color3.fromRGB(140, 140, 140),
-			AccentColor = Color3.fromRGB(30, 120, 200),
-			ErrorColor = Color3.fromRGB(200, 50, 50),
-			SuccessColor = Color3.fromRGB(50, 180, 90),
-			WarningColor = Color3.fromRGB(200, 160, 40)
-		},
-
-		Midnight = {
-			TextColor = Color3.fromRGB(230, 230, 255),
-			Background = Color3.fromRGB(6, 12, 30),
-			Topbar = Color3.fromRGB(12, 20, 50),
-			Shadow = Color3.fromRGB(2, 6, 12),
-			TabBackground = Color3.fromRGB(45, 60, 90),
-			TabStroke = Color3.fromRGB(50, 70, 110),
-			TabBackgroundSelected = Color3.fromRGB(80, 100, 150),
-			TabTextColor = Color3.fromRGB(210, 220, 255),
-			SelectedTabTextColor = Color3.fromRGB(10, 12, 20),
-			ElementBackground = Color3.fromRGB(18, 28, 46),
-			ElementBackgroundHover = Color3.fromRGB(28, 40, 64),
-			SecondaryElementBackground = Color3.fromRGB(12, 18, 32),
-			ElementStroke = Color3.fromRGB(40, 60, 90),
-			SecondaryElementStroke = Color3.fromRGB(30, 45, 70),
-			SliderBackground = Color3.fromRGB(80, 120, 200),
-			SliderProgress = Color3.fromRGB(80, 120, 200),
-			SliderStroke = Color3.fromRGB(100, 140, 255),
-			ToggleBackground = Color3.fromRGB(16, 20, 30),
-			ToggleEnabled = Color3.fromRGB(100, 140, 255),
-			ToggleDisabled = Color3.fromRGB(90, 90, 110),
-			ToggleEnabledStroke = Color3.fromRGB(140, 180, 255),
-			ToggleDisabledStroke = Color3.fromRGB(120, 120, 130),
-			ToggleEnabledOuterStroke = Color3.fromRGB(40, 50, 80),
-			ToggleDisabledOuterStroke = Color3.fromRGB(20, 20, 30),
-			DropdownSelected = Color3.fromRGB(20, 30, 44),
-			DropdownUnselected = Color3.fromRGB(14, 20, 36),
-			InputBackground = Color3.fromRGB(10, 16, 28),
-			InputStroke = Color3.fromRGB(30, 45, 70),
-			PlaceholderColor = Color3.fromRGB(150, 160, 200),
-			AccentColor = Color3.fromRGB(100, 140, 255),
+			AccentColor = Color3.fromRGB(0, 146, 214),
 			ErrorColor = Color3.fromRGB(220, 50, 50),
-			SuccessColor = Color3.fromRGB(60, 210, 120),
-			WarningColor = Color3.fromRGB(220, 180, 50)
+			SuccessColor = Color3.fromRGB(50, 200, 100),
+			WarningColor = Color3.fromRGB(220, 160, 50)
 		},
-
-		Forest = {
-			TextColor = Color3.fromRGB(230, 245, 230),
-			Background = Color3.fromRGB(10, 25, 15),
-			Topbar = Color3.fromRGB(12, 38, 20),
-			Shadow = Color3.fromRGB(6, 12, 8),
-			TabBackground = Color3.fromRGB(60, 100, 70),
-			TabStroke = Color3.fromRGB(70, 120, 80),
-			TabBackgroundSelected = Color3.fromRGB(200, 245, 210),
-			TabTextColor = Color3.fromRGB(230, 245, 230),
-			SelectedTabTextColor = Color3.fromRGB(20, 30, 18),
-			ElementBackground = Color3.fromRGB(20, 40, 22),
-			ElementBackgroundHover = Color3.fromRGB(30, 55, 30),
-			SecondaryElementBackground = Color3.fromRGB(12, 25, 15),
-			ElementStroke = Color3.fromRGB(40, 70, 50),
-			SecondaryElementStroke = Color3.fromRGB(30, 50, 36),
-			SliderBackground = Color3.fromRGB(34, 177, 76),
-			SliderProgress = Color3.fromRGB(34, 177, 76),
-			SliderStroke = Color3.fromRGB(80, 200, 120),
-			ToggleBackground = Color3.fromRGB(18, 30, 18),
-			ToggleEnabled = Color3.fromRGB(34, 177, 76),
-			ToggleDisabled = Color3.fromRGB(90, 90, 90),
-			ToggleEnabledStroke = Color3.fromRGB(80, 200, 120),
-			ToggleDisabledStroke = Color3.fromRGB(120, 120, 120),
-			ToggleEnabledOuterStroke = Color3.fromRGB(30, 60, 30),
-			ToggleDisabledOuterStroke = Color3.fromRGB(20, 35, 20),
-			DropdownSelected = Color3.fromRGB(18, 30, 22),
-			DropdownUnselected = Color3.fromRGB(14, 24, 18),
-			InputBackground = Color3.fromRGB(12, 22, 14),
-			InputStroke = Color3.fromRGB(30, 60, 36),
-			PlaceholderColor = Color3.fromRGB(170, 200, 170),
-			AccentColor = Color3.fromRGB(34, 177, 76),
-			ErrorColor = Color3.fromRGB(200, 60, 60),
-			SuccessColor = Color3.fromRGB(60, 200, 100),
-			WarningColor = Color3.fromRGB(190, 150, 50)
-		},
-
-		Sunset = {
-			TextColor = Color3.fromRGB(250, 240, 235),
-			Background = Color3.fromRGB(20, 10, 30),
-			Topbar = Color3.fromRGB(40, 20, 40),
-			Shadow = Color3.fromRGB(8, 4, 6),
-			TabBackground = Color3.fromRGB(120, 60, 80),
-			TabStroke = Color3.fromRGB(140, 70, 90),
-			TabBackgroundSelected = Color3.fromRGB(255, 180, 120),
-			TabTextColor = Color3.fromRGB(255, 240, 230),
-			SelectedTabTextColor = Color3.fromRGB(30, 10, 20),
-			ElementBackground = Color3.fromRGB(30, 15, 25),
-			ElementBackgroundHover = Color3.fromRGB(50, 25, 35),
-			SecondaryElementBackground = Color3.fromRGB(18, 8, 20),
-			ElementStroke = Color3.fromRGB(80, 40, 55),
-			SecondaryElementStroke = Color3.fromRGB(60, 30, 40),
-			SliderBackground = Color3.fromRGB(255, 100, 80),
-			SliderProgress = Color3.fromRGB(255, 100, 80),
-			SliderStroke = Color3.fromRGB(255, 140, 100),
-			ToggleBackground = Color3.fromRGB(28, 16, 22),
-			ToggleEnabled = Color3.fromRGB(255, 140, 80),
-			ToggleDisabled = Color3.fromRGB(110, 80, 85),
-			ToggleEnabledStroke = Color3.fromRGB(255, 180, 120),
-			ToggleDisabledStroke = Color3.fromRGB(140, 110, 120),
-			ToggleEnabledOuterStroke = Color3.fromRGB(50, 30, 35),
-			ToggleDisabledOuterStroke = Color3.fromRGB(30, 20, 24),
-			DropdownSelected = Color3.fromRGB(32, 18, 26),
-			DropdownUnselected = Color3.fromRGB(24, 12, 20),
-			InputBackground = Color3.fromRGB(24, 12, 20),
-			InputStroke = Color3.fromRGB(60, 30, 40),
-			PlaceholderColor = Color3.fromRGB(200, 170, 160),
-			AccentColor = Color3.fromRGB(255, 140, 80),
-			ErrorColor = Color3.fromRGB(220, 60, 60),
-			SuccessColor = Color3.fromRGB(100, 220, 120),
-			WarningColor = Color3.fromRGB(235, 160, 60)
-		},
-
-		Purple = {
-			TextColor = Color3.fromRGB(245, 235, 255),
-			Background = Color3.fromRGB(18, 10, 30),
-			Topbar = Color3.fromRGB(30, 12, 50),
-			Shadow = Color3.fromRGB(8, 6, 12),
-			TabBackground = Color3.fromRGB(80, 50, 110),
-			TabStroke = Color3.fromRGB(95, 60, 130),
-			TabBackgroundSelected = Color3.fromRGB(210, 180, 255),
-			TabTextColor = Color3.fromRGB(245, 235, 255),
-			SelectedTabTextColor = Color3.fromRGB(20, 10, 30),
-			ElementBackground = Color3.fromRGB(28, 18, 40),
-			ElementBackgroundHover = Color3.fromRGB(40, 25, 60),
-			SecondaryElementBackground = Color3.fromRGB(16, 10, 28),
-			ElementStroke = Color3.fromRGB(70, 40, 110),
-			SecondaryElementStroke = Color3.fromRGB(50, 30, 80),
-			SliderBackground = Color3.fromRGB(140, 80, 255),
-			SliderProgress = Color3.fromRGB(140, 80, 255),
-			SliderStroke = Color3.fromRGB(180, 110, 255),
-			ToggleBackground = Color3.fromRGB(20, 12, 30),
-			ToggleEnabled = Color3.fromRGB(140, 80, 255),
-			ToggleDisabled = Color3.fromRGB(95, 80, 100),
-			ToggleEnabledStroke = Color3.fromRGB(200, 140, 255),
-			ToggleDisabledStroke = Color3.fromRGB(120, 110, 120),
-			ToggleEnabledOuterStroke = Color3.fromRGB(40, 20, 60),
-			ToggleDisabledOuterStroke = Color3.fromRGB(25, 20, 36),
-			DropdownSelected = Color3.fromRGB(24, 14, 36),
-			DropdownUnselected = Color3.fromRGB(18, 10, 28),
-			InputBackground = Color3.fromRGB(16, 10, 26),
-			InputStroke = Color3.fromRGB(50, 30, 80),
-			PlaceholderColor = Color3.fromRGB(190, 170, 230),
-			AccentColor = Color3.fromRGB(140, 80, 255),
-			ErrorColor = Color3.fromRGB(210, 60, 60),
-			SuccessColor = Color3.fromRGB(90, 220, 140),
-			WarningColor = Color3.fromRGB(225, 170, 70)
-		},
-
-		Neon = {
-			TextColor = Color3.fromRGB(220, 255, 230),
-			Background = Color3.fromRGB(5, 5, 10),
-			Topbar = Color3.fromRGB(10, 10, 20),
-			Shadow = Color3.fromRGB(2, 2, 6),
-			TabBackground = Color3.fromRGB(25, 25, 40),
-			TabStroke = Color3.fromRGB(30, 30, 50),
-			TabBackgroundSelected = Color3.fromRGB(0, 255, 180),
-			TabTextColor = Color3.fromRGB(220, 255, 230),
-			SelectedTabTextColor = Color3.fromRGB(5, 5, 10),
-			ElementBackground = Color3.fromRGB(12, 12, 18),
-			ElementBackgroundHover = Color3.fromRGB(20, 20, 30),
-			SecondaryElementBackground = Color3.fromRGB(8, 8, 14),
-			ElementStroke = Color3.fromRGB(30, 30, 60),
-			SecondaryElementStroke = Color3.fromRGB(18, 18, 32),
-			SliderBackground = Color3.fromRGB(0, 255, 180),
-			SliderProgress = Color3.fromRGB(0, 255, 180),
-			SliderStroke = Color3.fromRGB(0, 200, 160),
-			ToggleBackground = Color3.fromRGB(10, 10, 16),
-			ToggleEnabled = Color3.fromRGB(0, 255, 180),
-			ToggleDisabled = Color3.fromRGB(90, 90, 100),
-			ToggleEnabledStroke = Color3.fromRGB(120, 255, 200),
-			ToggleDisabledStroke = Color3.fromRGB(120, 120, 130),
-			ToggleEnabledOuterStroke = Color3.fromRGB(30, 30, 40),
-			ToggleDisabledOuterStroke = Color3.fromRGB(18, 18, 24),
-			DropdownSelected = Color3.fromRGB(10, 12, 18),
-			DropdownUnselected = Color3.fromRGB(8, 10, 14),
-			InputBackground = Color3.fromRGB(10, 10, 16),
-			InputStroke = Color3.fromRGB(40, 40, 60),
-			PlaceholderColor = Color3.fromRGB(160, 255, 210),
-			AccentColor = Color3.fromRGB(0, 255, 180),
-			ErrorColor = Color3.fromRGB(255, 80, 80),
-			SuccessColor = Color3.fromRGB(120, 255, 170),
-			WarningColor = Color3.fromRGB(255, 220, 90)
-		},
-
-		Retro = {
-			TextColor = Color3.fromRGB(250, 240, 220),
-			Background = Color3.fromRGB(35, 30, 20),
-			Topbar = Color3.fromRGB(60, 50, 35),
-			Shadow = Color3.fromRGB(12, 10, 6),
-			TabBackground = Color3.fromRGB(90, 70, 50),
-			TabStroke = Color3.fromRGB(100, 80, 60),
-			TabBackgroundSelected = Color3.fromRGB(200, 150, 90),
-			TabTextColor = Color3.fromRGB(250, 240, 220),
-			SelectedTabTextColor = Color3.fromRGB(30, 20, 18),
-			ElementBackground = Color3.fromRGB(50, 44, 36),
-			ElementBackgroundHover = Color3.fromRGB(70, 62, 50),
-			SecondaryElementBackground = Color3.fromRGB(40, 36, 28),
-			ElementStroke = Color3.fromRGB(120, 90, 60),
-			SecondaryElementStroke = Color3.fromRGB(80, 66, 46),
-			SliderBackground = Color3.fromRGB(255, 200, 120),
-			SliderProgress = Color3.fromRGB(255, 200, 120),
-			SliderStroke = Color3.fromRGB(240, 170, 80),
-			ToggleBackground = Color3.fromRGB(45, 38, 30),
-			ToggleEnabled = Color3.fromRGB(255, 200, 120),
-			ToggleDisabled = Color3.fromRGB(120, 110, 100),
-			ToggleEnabledStroke = Color3.fromRGB(255, 220, 150),
-			ToggleDisabledStroke = Color3.fromRGB(140, 130, 120),
-			ToggleEnabledOuterStroke = Color3.fromRGB(70, 54, 40),
-			ToggleDisabledOuterStroke = Color3.fromRGB(40, 36, 30),
-			DropdownSelected = Color3.fromRGB(42, 36, 30),
-			DropdownUnselected = Color3.fromRGB(36, 30, 26),
-			InputBackground = Color3.fromRGB(32, 28, 22),
-			InputStroke = Color3.fromRGB(90, 70, 46),
-			PlaceholderColor = Color3.fromRGB(210, 190, 160),
-			AccentColor = Color3.fromRGB(255, 200, 120),
-			ErrorColor = Color3.fromRGB(200, 60, 60),
-			SuccessColor = Color3.fromRGB(180, 220, 140),
-			WarningColor = Color3.fromRGB(220, 170, 80)
-		},
-
-		Monochrome = {
-			TextColor = Color3.fromRGB(240, 240, 240),
-			Background = Color3.fromRGB(20, 20, 20),
-			Topbar = Color3.fromRGB(25, 25, 25),
-			Shadow = Color3.fromRGB(8, 8, 8),
-			TabBackground = Color3.fromRGB(70, 70, 70),
-			TabStroke = Color3.fromRGB(85, 85, 85),
-			TabBackgroundSelected = Color3.fromRGB(200, 200, 200),
-			TabTextColor = Color3.fromRGB(240, 240, 240),
-			SelectedTabTextColor = Color3.fromRGB(20, 20, 20),
-			ElementBackground = Color3.fromRGB(35, 35, 35),
-			ElementBackgroundHover = Color3.fromRGB(45, 45, 45),
-			SecondaryElementBackground = Color3.fromRGB(26, 26, 26),
-			ElementStroke = Color3.fromRGB(60, 60, 60),
-			SecondaryElementStroke = Color3.fromRGB(44, 44, 44),
-			SliderBackground = Color3.fromRGB(180, 180, 180),
-			SliderProgress = Color3.fromRGB(180, 180, 180),
-			SliderStroke = Color3.fromRGB(210, 210, 210),
-			ToggleBackground = Color3.fromRGB(28, 28, 28),
-			ToggleEnabled = Color3.fromRGB(180, 180, 180),
-			ToggleDisabled = Color3.fromRGB(100, 100, 100),
-			ToggleEnabledStroke = Color3.fromRGB(210, 210, 210),
-			ToggleDisabledStroke = Color3.fromRGB(130, 130, 130),
-			ToggleEnabledOuterStroke = Color3.fromRGB(90, 90, 90),
-			ToggleDisabledOuterStroke = Color3.fromRGB(40, 40, 40),
-			DropdownSelected = Color3.fromRGB(32, 32, 32),
-			DropdownUnselected = Color3.fromRGB(24, 24, 24),
-			InputBackground = Color3.fromRGB(28, 28, 28),
-			InputStroke = Color3.fromRGB(60, 60, 60),
-			PlaceholderColor = Color3.fromRGB(160, 160, 160),
-			AccentColor = Color3.fromRGB(180, 180, 180),
-			ErrorColor = Color3.fromRGB(200, 60, 60),
-			SuccessColor = Color3.fromRGB(160, 200, 160),
-			WarningColor = Color3.fromRGB(200, 180, 140)
-		},
-
-		Pastel = {
-			TextColor = Color3.fromRGB(30, 30, 30),
-			Background = Color3.fromRGB(245, 245, 250),
-			Topbar = Color3.fromRGB(235, 230, 245),
-			Shadow = Color3.fromRGB(220, 220, 230),
-			TabBackground = Color3.fromRGB(230, 220, 240),
-			TabStroke = Color3.fromRGB(210, 200, 230),
-			TabBackgroundSelected = Color3.fromRGB(170, 150, 230),
-			TabTextColor = Color3.fromRGB(30, 30, 30),
+		
+		Midnight = {
+			TextColor = Color3.fromRGB(200, 200, 220),
+			Background = Color3.fromRGB(15, 15, 25),
+			Topbar = Color3.fromRGB(20, 20, 35),
+			Shadow = Color3.fromRGB(10, 10, 15),
+			TabBackground = Color3.fromRGB(30, 30, 50),
+			TabStroke = Color3.fromRGB(40, 40, 60),
+			TabBackgroundSelected = Color3.fromRGB(80, 80, 150),
+			TabTextColor = Color3.fromRGB(180, 180, 200),
 			SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
-			ElementBackground = Color3.fromRGB(255, 255, 255),
-			ElementBackgroundHover = Color3.fromRGB(250, 250, 255),
-			SecondaryElementBackground = Color3.fromRGB(242, 240, 246),
-			ElementStroke = Color3.fromRGB(210, 200, 220),
-			SecondaryElementStroke = Color3.fromRGB(230, 220, 235),
-			SliderBackground = Color3.fromRGB(170, 120, 255),
-			SliderProgress = Color3.fromRGB(170, 120, 255),
-			SliderStroke = Color3.fromRGB(200, 160, 255),
-			ToggleBackground = Color3.fromRGB(245, 245, 250),
-			ToggleEnabled = Color3.fromRGB(170, 120, 255),
-			ToggleDisabled = Color3.fromRGB(180, 180, 190),
-			ToggleEnabledStroke = Color3.fromRGB(210, 180, 255),
-			ToggleDisabledStroke = Color3.fromRGB(160, 160, 170),
-			ToggleEnabledOuterStroke = Color3.fromRGB(150, 120, 180),
-			ToggleDisabledOuterStroke = Color3.fromRGB(200, 200, 205),
-			DropdownSelected = Color3.fromRGB(240, 235, 246),
-			DropdownUnselected = Color3.fromRGB(235, 232, 240),
-			InputBackground = Color3.fromRGB(255, 255, 255),
-			InputStroke = Color3.fromRGB(220, 210, 230),
-			PlaceholderColor = Color3.fromRGB(170, 170, 180),
-			AccentColor = Color3.fromRGB(170, 120, 255),
-			ErrorColor = Color3.fromRGB(215, 80, 80),
-			SuccessColor = Color3.fromRGB(100, 210, 140),
-			WarningColor = Color3.fromRGB(230, 180, 120)
+			ElementBackground = Color3.fromRGB(25, 25, 40),
+			ElementBackgroundHover = Color3.fromRGB(30, 30, 50),
+			SecondaryElementBackground = Color3.fromRGB(20, 20, 35),
+			ElementStroke = Color3.fromRGB(40, 40, 60),
+			SecondaryElementStroke = Color3.fromRGB(35, 35, 55),
+			SliderBackground = Color3.fromRGB(30, 30, 45),
+			SliderProgress = Color3.fromRGB(100, 100, 200),
+			SliderStroke = Color3.fromRGB(120, 120, 220),
+			ToggleBackground = Color3.fromRGB(25, 25, 40),
+			ToggleEnabled = Color3.fromRGB(100, 100, 200),
+			ToggleDisabled = Color3.fromRGB(60, 60, 80),
+			ToggleEnabledStroke = Color3.fromRGB(130, 130, 230),
+			ToggleDisabledStroke = Color3.fromRGB(80, 80, 100),
+			ToggleEnabledOuterStroke = Color3.fromRGB(70, 70, 120),
+			ToggleDisabledOuterStroke = Color3.fromRGB(50, 50, 70),
+			DropdownSelected = Color3.fromRGB(30, 30, 50),
+			DropdownUnselected = Color3.fromRGB(25, 25, 40),
+			InputBackground = Color3.fromRGB(25, 25, 40),
+			InputStroke = Color3.fromRGB(50, 50, 70),
+			PlaceholderColor = Color3.fromRGB(120, 120, 140),
+			AccentColor = Color3.fromRGB(100, 100, 200),
+			ErrorColor = Color3.fromRGB(220, 80, 100),
+			SuccessColor = Color3.fromRGB(100, 200, 150),
+			WarningColor = Color3.fromRGB(220, 180, 100)
 		}
 	}
 }
 
-
 local SelectedTheme = MercuryLibrary.Theme.Default
 local Hidden = false
 local Minimized = false
-local Debounce = false
 
 -- Utility Functions
 local function ChangeTheme(Theme)
@@ -467,7 +206,7 @@ local function UnpackColor(Color)
 	return Color3.fromRGB(Color.R, Color.G, Color.B)
 end
 
-local function Tween(Object, Properties, Duration, Style, Direction)
+local function Tween(Object, Properties, Duration, Style, Direction, Callback)
 	Duration = Duration or AnimationSpeed
 	Style = Style or AnimationStyle
 	Direction = Direction or AnimationDirection
@@ -477,6 +216,11 @@ local function Tween(Object, Properties, Duration, Style, Direction)
 		TweenInfo.new(Duration, Style, Direction),
 		Properties
 	)
+	
+	if Callback then
+		tween.Completed:Connect(Callback)
+	end
+	
 	tween:Play()
 	return tween
 end
@@ -501,9 +245,7 @@ local function RippleEffect(Object, X, Y)
 	Tween(Ripple, {
 		Size = UDim2.new(0, MaxSize, 0, MaxSize),
 		BackgroundTransparency = 1
-	}, 0.5)
-	
-	task.delay(0.5, function()
+	}, 0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out, function()
 		Ripple:Destroy()
 	end)
 end
@@ -555,14 +297,20 @@ function MercuryLibrary:Notify(Settings)
 		local Title = Settings.Title or "Notification"
 		local Content = Settings.Content or ""
 		local Duration = Settings.Duration or 3
-		local Type = Settings.Type or "Default" -- Default, Success, Warning, Error
+		local Type = Settings.Type or "Default"
 		
-		-- Create notification GUI
-		local NotificationHolder = game:GetObjects("rbxassetid://10804731440")[1].Main.Parent:FindFirstChild("Notifications")
+		-- Create notification holder if it doesn't exist
+		local NotificationHolder = nil
+		
+		if gethui then
+			NotificationHolder = gethui():FindFirstChild("MercuryNotifications")
+		else
+			NotificationHolder = CoreGui:FindFirstChild("MercuryNotifications")
+		end
 		
 		if not NotificationHolder then
 			NotificationHolder = Instance.new("ScreenGui")
-			NotificationHolder.Name = "Notifications"
+			NotificationHolder.Name = "MercuryNotifications"
 			NotificationHolder.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 			NotificationHolder.ResetOnSpawn = false
 			
@@ -578,12 +326,12 @@ function MercuryLibrary:Notify(Settings)
 		Notification.BackgroundColor3 = SelectedTheme.ElementBackground
 		Notification.BorderSizePixel = 0
 		Notification.Size = UDim2.new(0, 300, 0, 80)
-		Notification.Position = UDim2.new(1, 20, 1, -100)
+		Notification.Position = UDim2.new(1, 20, 1, -100 - (#NotificationHolder:GetChildren() * 90))
 		Notification.ClipsDescendants = true
 		Notification.Parent = NotificationHolder
 		
 		local Corner = Instance.new("UICorner")
-		Corner.CornerRadius = UDim.new(0, 6)
+		Corner.CornerRadius = UDim.new(0, 8)
 		Corner.Parent = Notification
 		
 		local Stroke = Instance.new("UIStroke")
@@ -591,11 +339,24 @@ function MercuryLibrary:Notify(Settings)
 		Stroke.Thickness = 1
 		Stroke.Parent = Notification
 		
+		local Shadow = Instance.new("ImageLabel")
+		Shadow.Name = "Shadow"
+		Shadow.BackgroundTransparency = 1
+		Shadow.Position = UDim2.new(0, -15, 0, -15)
+		Shadow.Size = UDim2.new(1, 30, 1, 30)
+		Shadow.ZIndex = -1
+		Shadow.Image = "rbxassetid://5554236805"
+		Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+		Shadow.ImageTransparency = 0.7
+		Shadow.ScaleType = Enum.ScaleType.Slice
+		Shadow.SliceCenter = Rect.new(23, 23, 277, 277)
+		Shadow.Parent = Notification
+		
 		local TitleLabel = Instance.new("TextLabel")
 		TitleLabel.Name = "Title"
 		TitleLabel.BackgroundTransparency = 1
-		TitleLabel.Position = UDim2.new(0, 15, 0, 10)
-		TitleLabel.Size = UDim2.new(1, -30, 0, 20)
+		TitleLabel.Position = UDim2.new(0, 50, 0, 10)
+		TitleLabel.Size = UDim2.new(1, -60, 0, 20)
 		TitleLabel.Font = Enum.Font.GothamBold
 		TitleLabel.Text = Title
 		TitleLabel.TextColor3 = SelectedTheme.TextColor
@@ -606,8 +367,8 @@ function MercuryLibrary:Notify(Settings)
 		local ContentLabel = Instance.new("TextLabel")
 		ContentLabel.Name = "Content"
 		ContentLabel.BackgroundTransparency = 1
-		ContentLabel.Position = UDim2.new(0, 15, 0, 35)
-		ContentLabel.Size = UDim2.new(1, -30, 0, 35)
+		ContentLabel.Position = UDim2.new(0, 50, 0, 35)
+		ContentLabel.Size = UDim2.new(1, -60, 0, 35)
 		ContentLabel.Font = Enum.Font.Gotham
 		ContentLabel.Text = Content
 		ContentLabel.TextColor3 = SelectedTheme.TextColor
@@ -635,17 +396,41 @@ function MercuryLibrary:Notify(Settings)
 		Indicator.Parent = Notification
 		
 		local IndicatorCorner = Instance.new("UICorner")
-		IndicatorCorner.CornerRadius = UDim.new(0, 6)
+		IndicatorCorner.CornerRadius = UDim.new(0, 8)
 		IndicatorCorner.Parent = Indicator
 		
+		local Icon = Instance.new("TextLabel")
+		Icon.Name = "Icon"
+		Icon.BackgroundTransparency = 1
+		Icon.Position = UDim2.new(0, 15, 0, 0)
+		Icon.Size = UDim2.new(0, 30, 1, 0)
+		Icon.Font = Enum.Font.GothamBold
+		Icon.TextColor3 = TypeColor
+		Icon.TextSize = 24
+		Icon.Text = "i"
+		if Type == "Success" then Icon.Text = "✓"
+		elseif Type == "Warning" then Icon.Text = "⚠"
+		elseif Type == "Error" then Icon.Text = "✕" end
+		Icon.Parent = Notification
+		
 		-- Animate in
-		Tween(Notification, {Position = UDim2.new(1, -320, 1, -100)}, 0.5, Enum.EasingStyle.Back)
+		Tween(Notification, {Position = UDim2.new(1, -320, 1, -100 - (#NotificationHolder:GetChildren() - 1) * 90)}, 0.5, Enum.EasingStyle.Back)
 		
 		-- Animate out
 		task.delay(Duration, function()
-			Tween(Notification, {Position = UDim2.new(1, 20, 1, -100)}, 0.5)
-			task.wait(0.5)
-			Notification:Destroy()
+			Tween(Notification, {
+				Position = UDim2.new(1, 20, 1, -100 - (#NotificationHolder:GetChildren() - 1) * 90),
+				BackgroundTransparency = 1
+			}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In, function()
+				Notification:Destroy()
+			end)
+			
+			Tween(TitleLabel, {TextTransparency = 1}, 0.5)
+			Tween(ContentLabel, {TextTransparency = 1}, 0.5)
+			Tween(Icon, {TextTransparency = 1}, 0.5)
+			Tween(Indicator, {BackgroundTransparency = 1}, 0.5)
+			Tween(Stroke, {Transparency = 1}, 0.5)
+			Tween(Shadow, {ImageTransparency = 1}, 0.5)
 		end)
 		
 		table.insert(MercuryLibrary.Notifications, Notification)
@@ -693,11 +478,9 @@ end
 function MercuryLibrary:CreateWindow(Settings)
 	Settings = Settings or {}
 	
-	-- Create base UI structure
-	local Mercury = Instance.new("ScreenGui")
+	-- Load the Mercury GUI from asset
+	local Mercury = game:GetObjects("rbxassetid://10804731440")[1]
 	Mercury.Name = "Mercury"
-	Mercury.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	Mercury.ResetOnSpawn = false
 	Mercury.Enabled = false
 	
 	if gethui then
@@ -715,175 +498,108 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 	end
 	
-	-- Main frame
-	local Main = Instance.new("Frame")
-	Main.Name = "Main"
+	local Main = Mercury.Main
+	local Topbar = Main.Topbar
+	local Elements = Main.Elements
+	local TabList = Main.TabList
+	
+	-- Apply theme
 	Main.BackgroundColor3 = SelectedTheme.Background
-	Main.BorderSizePixel = 0
-	Main.Position = UDim2.new(0.5, -250, 0.5, -237)
-	Main.Size = UDim2.new(0, 500, 0, 475)
-	Main.ClipsDescendants = true
-	Main.Parent = Mercury
-	
-	local MainCorner = Instance.new("UICorner")
-	MainCorner.CornerRadius = UDim.new(0, 8)
-	MainCorner.Parent = Main
-	
-	local MainStroke = Instance.new("UIStroke")
-	MainStroke.Color = SelectedTheme.Shadow
-	MainStroke.Thickness = 2
-	MainStroke.Parent = Main
-	
-	-- Topbar
-	local Topbar = Instance.new("Frame")
-	Topbar.Name = "Topbar"
 	Topbar.BackgroundColor3 = SelectedTheme.Topbar
-	Topbar.BorderSizePixel = 0
-	Topbar.Size = UDim2.new(1, 0, 0, 45)
-	Topbar.Parent = Main
 	
-	local TopbarCorner = Instance.new("UICorner")
-	TopbarCorner.CornerRadius = UDim.new(0, 8)
-	TopbarCorner.Parent = Topbar
-	
-	-- Fix topbar corner bottom
-	local TopbarFix = Instance.new("Frame")
-	TopbarFix.BackgroundColor3 = SelectedTheme.Topbar
-	TopbarFix.BorderSizePixel = 0
-	TopbarFix.Position = UDim2.new(0, 0, 1, -8)
-	TopbarFix.Size = UDim2.new(1, 0, 0, 8)
-	TopbarFix.Parent = Topbar
-	
-	local Title = Instance.new("TextLabel")
-	Title.Name = "Title"
-	Title.BackgroundTransparency = 1
-	Title.Position = UDim2.new(0, 15, 0, 0)
-	Title.Size = UDim2.new(0, 400, 1, 0)
-	Title.Font = Enum.Font.GothamBold
-	Title.Text = Settings.Name or "Mercury"
-	Title.TextColor3 = SelectedTheme.TextColor
-	Title.TextSize = 16
-	Title.TextXAlignment = Enum.TextXAlignment.Left
-	Title.Parent = Topbar
-	
-	-- Control buttons
-	local ControlsFrame = Instance.new("Frame")
-	ControlsFrame.Name = "Controls"
-	ControlsFrame.BackgroundTransparency = 1
-	ControlsFrame.Position = UDim2.new(1, -100, 0, 0)
-	ControlsFrame.Size = UDim2.new(0, 100, 1, 0)
-	ControlsFrame.Parent = Topbar
-	
-	local ControlsList = Instance.new("UIListLayout")
-	ControlsList.FillDirection = Enum.FillDirection.Horizontal
-	ControlsList.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	ControlsList.VerticalAlignment = Enum.VerticalAlignment.Center
-	ControlsList.Padding = UDim.new(0, 5)
-	ControlsList.Parent = ControlsFrame
-	
-	-- Minimize button
-	local MinimizeBtn = Instance.new("TextButton")
-	MinimizeBtn.Name = "Minimize"
-	MinimizeBtn.BackgroundColor3 = SelectedTheme.ElementBackground
-	MinimizeBtn.BorderSizePixel = 0
-	MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-	MinimizeBtn.Font = Enum.Font.GothamBold
-	MinimizeBtn.Text = "_"
-	MinimizeBtn.TextColor3 = SelectedTheme.TextColor
-	MinimizeBtn.TextSize = 18
-	MinimizeBtn.Parent = ControlsFrame
-	
-	local MinCorner = Instance.new("UICorner")
-	MinCorner.CornerRadius = UDim.new(0, 4)
-	MinCorner.Parent = MinimizeBtn
-	
-	-- Close button
-	local CloseBtn = Instance.new("TextButton")
-	CloseBtn.Name = "Close"
-	CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-	CloseBtn.BorderSizePixel = 0
-	CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-	CloseBtn.Font = Enum.Font.GothamBold
-	CloseBtn.Text = "X"
-	CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloseBtn.TextSize = 14
-	CloseBtn.Parent = ControlsFrame
-	
-	local CloseCorner = Instance.new("UICorner")
-	CloseCorner.CornerRadius = UDim.new(0, 4)
-	CloseCorner.Parent = CloseBtn
-	
-	-- Tab list
-	local TabList = Instance.new("ScrollingFrame")
-	TabList.Name = "TabList"
-	TabList.BackgroundTransparency = 1
-	TabList.BorderSizePixel = 0
-	TabList.Position = UDim2.new(0, 10, 0, 55)
-	TabList.Size = UDim2.new(0, 120, 1, -65)
-	TabList.CanvasSize = UDim2.new(0, 0, 0, 0)
-	TabList.ScrollBarThickness = 4
-	TabList.ScrollBarImageColor3 = SelectedTheme.ElementStroke
-	TabList.Parent = Main
-	
-	local TabListLayout = Instance.new("UIListLayout")
-	TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	TabListLayout.Padding = UDim.new(0, 5)
-	TabListLayout.Parent = TabList
-	
-	TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		TabList.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 10)
-	end)
-	
-	-- Elements container
-	local Elements = Instance.new("Frame")
-	Elements.Name = "Elements"
-	Elements.BackgroundTransparency = 1
-	Elements.Position = UDim2.new(0, 140, 0, 55)
-	Elements.Size = UDim2.new(1, -150, 1, -65)
-	Elements.ClipsDescendants = true
-	Elements.Parent = Main
-	
-	local ElementsPageLayout = Instance.new("UIPageLayout")
-	ElementsPageLayout.FillDirection = Enum.FillDirection.Horizontal
-	ElementsPageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	ElementsPageLayout.EasingStyle = Enum.EasingStyle.Quart
-	ElementsPageLayout.EasingDirection = Enum.EasingDirection.Out
-	ElementsPageLayout.TweenTime = 0.3
-	ElementsPageLayout.Parent = Elements
-	
+	-- Configure
+	Topbar.Title.Text = Settings.Name or "Mercury"
 	Mercury.Enabled = true
 	Main.Visible = true
 	
-	-- Dragging
+	-- Add resize handle
+	local ResizeHandle = Instance.new("Frame")
+	ResizeHandle.Name = "ResizeHandle"
+	ResizeHandle.BackgroundColor3 = SelectedTheme.AccentColor
+	ResizeHandle.BackgroundTransparency = 0.7
+	ResizeHandle.BorderSizePixel = 0
+	ResizeHandle.Position = UDim2.new(1, -15, 1, -15)
+	ResizeHandle.Size = UDim2.new(0, 15, 0, 15)
+	ResizeHandle.ZIndex = 100
+	ResizeHandle.Parent = Main
+	
+	local ResizeCorner = Instance.new("UICorner")
+	ResizeCorner.CornerRadius = UDim.new(0, 4)
+	ResizeCorner.Parent = ResizeHandle
+	
+	ResizeHandle.MouseEnter:Connect(function()
+		Tween(ResizeHandle, {BackgroundTransparency = 0.3}, 0.2)
+	end)
+	
+	ResizeHandle.MouseLeave:Connect(function()
+		Tween(ResizeHandle, {BackgroundTransparency = 0.7}, 0.2)
+	end)
+	
+	-- Dragging setup
 	local Dragging = false
 	local DragStart = nil
 	local StartPos = nil
+	local Resizing = false
+	local ResizeStart = nil
+	local StartSize = nil
 	
 	Topbar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType.Touch then
 			Dragging = true
 			DragStart = input.Position
 			StartPos = Main.Position
+			
+			Tween(Main, {Size = Main.Size + UDim2.new(0, 10, 0, 10)}, 0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			task.wait(0.1)
+			Tween(Main, {Size = Main.Size - UDim2.new(0, 10, 0, 10)}, 0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					Dragging = false
+				end
+			end)
 		end
 	end)
 	
-	Topbar.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			Dragging = false
-		end
-	end)
-	
-	UserInputService.InputChanged:Connect(function(input)
-		if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local Delta = input.Position - DragStart
-			Tween(Main, {
-				Position = UDim2.new(
+	Topbar.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			if Dragging then
+				local Delta = input.Position - DragStart
+				Main.Position = UDim2.new(
 					StartPos.X.Scale,
 					StartPos.X.Offset + Delta.X,
 					StartPos.Y.Scale,
 					StartPos.Y.Offset + Delta.Y
 				)
-			}, 0.1)
+			end
+		end
+	end)
+	
+	-- Resizing
+	ResizeHandle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			Resizing = true
+			ResizeStart = input.Position
+			StartSize = Main.Size
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					Resizing = false
+				end
+			end)
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if Resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local Delta = input.Position - ResizeStart
+			local NewSize = UDim2.new(
+				0,
+				math.max(400, StartSize.X.Offset + Delta.X),
+				0,
+				math.max(300, StartSize.Y.Offset + Delta.Y)
+			)
+			Main.Size = NewSize
 		end
 	end)
 	
@@ -901,50 +617,51 @@ function MercuryLibrary:CreateWindow(Settings)
 		Mercury = Mercury
 	}
 	
-	-- Close button
-	CloseBtn.MouseButton1Click:Connect(function()
-		RippleEffect(CloseBtn, CloseBtn.AbsoluteSize.X / 2, CloseBtn.AbsoluteSize.Y / 2)
-		Window:Toggle()
-	end)
+	function Window:SetSize(Width, Height)
+		Tween(Main, {Size = UDim2.new(0, Width, 0, Height)}, 0.4, Enum.EasingStyle.Quart)
+	end
 	
-	-- Minimize button
-	MinimizeBtn.MouseButton1Click:Connect(function()
-		RippleEffect(MinimizeBtn, MinimizeBtn.AbsoluteSize.X / 2, MinimizeBtn.AbsoluteSize.Y / 2)
-		if Minimized then
-			Window:Maximize()
-		else
-			Window:Minimize()
+	function Window:GetSize()
+		return Main.Size
+	end
+	
+	function Window:SetPosition(X, Y)
+		Tween(Main, {Position = UDim2.new(0, X, 0, Y)}, 0.4, Enum.EasingStyle.Quart)
+	end
+	
+	function Window:Center()
+		local ViewportSize = workspace.CurrentCamera.ViewportSize
+		Tween(Main, {
+			Position = UDim2.new(0, (ViewportSize.X - Main.AbsoluteSize.X) / 2, 0, (ViewportSize.Y - Main.AbsoluteSize.Y) / 2)
+		}, 0.5, Enum.EasingStyle.Quart)
+	end
+	
+	function Window:Shake(Intensity)
+		Intensity = Intensity or 10
+		local OriginalPos = Main.Position
+		for i = 1, 5 do
+			Tween(Main, {
+				Position = OriginalPos + UDim2.new(0, math.random(-Intensity, Intensity), 0, math.random(-Intensity, Intensity))
+			}, 0.05)
+			task.wait(0.05)
 		end
-	end)
+		Tween(Main, {Position = OriginalPos}, 0.1)
+	end
 	
-	-- Hover effects
-	MinimizeBtn.MouseEnter:Connect(function()
-		Tween(MinimizeBtn, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
-	end)
-	
-	MinimizeBtn.MouseLeave:Connect(function()
-		Tween(MinimizeBtn, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
-	end)
-	
-	CloseBtn.MouseEnter:Connect(function()
-		Tween(CloseBtn, {BackgroundColor3 = Color3.fromRGB(255, 80, 80)}, 0.2)
-	end)
-	
-	CloseBtn.MouseLeave:Connect(function()
-		Tween(CloseBtn, {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}, 0.2)
-	end)
-	
-	function Window:SetTheme(ThemeName)
+	function Window:Pulse()
+		local OriginalSize = Main.Size
+		Tween(Main, {Size = OriginalSize * 1.05}, 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		task.wait(0.15)
+		Tween(Main, {Size = OriginalSize}, 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	end
 		if typeof(ThemeName) == 'string' and MercuryLibrary.Theme[ThemeName] then
 			ChangeTheme(ThemeName)
 		elseif typeof(ThemeName) == 'table' then
 			ChangeTheme(ThemeName)
 		end
 		
-		-- Update colors
-		Tween(Main, {BackgroundColor3 = SelectedTheme.Background})
-		Tween(Topbar, {BackgroundColor3 = SelectedTheme.Topbar})
-		Tween(TopbarFix, {BackgroundColor3 = SelectedTheme.Topbar})
+		Tween(Main, {BackgroundColor3 = SelectedTheme.Background}, 0.3)
+		Tween(Topbar, {BackgroundColor3 = SelectedTheme.Topbar}, 0.3)
 	end
 	
 	function Window:Toggle()
@@ -955,13 +672,62 @@ function MercuryLibrary:CreateWindow(Settings)
 	function Window:Show()
 		Hidden = false
 		Mercury.Enabled = true
-		Tween(Main, {Size = UDim2.new(0, 500, 0, 475)}, 0.5, Enum.EasingStyle.Back)
+		Tween(Main, {Size = UDim2.new(0, 500, 0, 475)}, 0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 	end
 	
 	function Window:Hide()
+		Tween(Main, {Size = UDim2.new(0, 500, 0, 0)}, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In, function()
+			Hidden = true
+			Mercury.Enabled = false
+		end)
+	end
+	
+	function Window:FadeIn()
+		Mercury.Enabled = true
+		Main.BackgroundTransparency = 1
+		Topbar.BackgroundTransparency = 1
+		for _, v in pairs(Main:GetDescendants()) do
+			if v:IsA("TextLabel") or v:IsA("TextButton") then
+				v.TextTransparency = 1
+			elseif v:IsA("ImageLabel") or v:IsA("ImageButton") then
+				v.ImageTransparency = 1
+			elseif v:IsA("Frame") then
+				v.BackgroundTransparency = 1
+			end
+		end
+		
+		Tween(Main, {BackgroundTransparency = 0}, 0.5)
+		Tween(Topbar, {BackgroundTransparency = 0}, 0.5)
+		
+		for _, v in pairs(Main:GetDescendants()) do
+			if v:IsA("TextLabel") or v:IsA("TextButton") then
+				Tween(v, {TextTransparency = 0}, 0.5)
+			elseif v:IsA("ImageLabel") or v:IsA("ImageButton") then
+				Tween(v, {ImageTransparency = 0}, 0.5)
+			elseif v:IsA("Frame") and v.Name ~= "Template" then
+				Tween(v, {BackgroundTransparency = 0}, 0.5)
+			end
+		end
+		
+		Hidden = false
+	end
+	
+	function Window:FadeOut()
+		Tween(Main, {BackgroundTransparency = 1}, 0.5)
+		Tween(Topbar, {BackgroundTransparency = 1}, 0.5)
+		
+		for _, v in pairs(Main:GetDescendants()) do
+			if v:IsA("TextLabel") or v:IsA("TextButton") then
+				Tween(v, {TextTransparency = 1}, 0.5)
+			elseif v:IsA("ImageLabel") or v:IsA("ImageButton") then
+				Tween(v, {ImageTransparency = 1}, 0.5)
+			elseif v:IsA("Frame") then
+				Tween(v, {BackgroundTransparency = 1}, 0.5)
+			end
+		end
+		
+		task.wait(0.5)
 		Hidden = true
-		Tween(Main, {Size = UDim2.new(0, 500, 0, 0)}, 0.3)
-		task.wait(0.3)
 		Mercury.Enabled = false
 	end
 	
@@ -972,15 +738,13 @@ function MercuryLibrary:CreateWindow(Settings)
 	function Window:Minimize()
 		if Minimized then return end
 		Minimized = true
-		MinimizeBtn.Text = "□"
-		Tween(Main, {Size = UDim2.new(0, 500, 0, 45)}, 0.5, Enum.EasingStyle.Exponential)
+		Tween(Main, {Size = UDim2.new(0, 500, 0, 45)}, 0.4, Enum.EasingStyle.Quart)
 	end
 	
 	function Window:Maximize()
 		if not Minimized then return end
 		Minimized = false
-		MinimizeBtn.Text = "_"
-		Tween(Main, {Size = UDim2.new(0, 500, 0, 475)}, 0.5, Enum.EasingStyle.Exponential)
+		Tween(Main, {Size = UDim2.new(0, 500, 0, 475)}, 0.4, Enum.EasingStyle.Quart)
 	end
 	
 	function Window:IsMinimized()
@@ -988,8 +752,6 @@ function MercuryLibrary:CreateWindow(Settings)
 	end
 	
 	function Window:Destroy()
-		Tween(Main, {Size = UDim2.new(0, 0, 0, 0)}, 0.5)
-		task.wait(0.5)
 		Mercury:Destroy()
 	end
 	
@@ -1000,17 +762,17 @@ function MercuryLibrary:CreateWindow(Settings)
 	function Window:SelectTab(TabName)
 		for _, tab in pairs(Window.Tabs) do
 			if tab.Name == TabName then
-				ElementsPageLayout:JumpToIndex(tab.Index)
+				Elements.UIPageLayout:JumpTo(tab.Page)
 				Window.CurrentTab = tab
 				
 				for _, btn in ipairs(TabList:GetChildren()) do
 					if btn:IsA("Frame") and btn.Name ~= "Template" then
 						if btn.Name == TabName then
-							Tween(btn, {BackgroundColor3 = SelectedTheme.TabBackgroundSelected})
-							Tween(btn.Title, {TextColor3 = SelectedTheme.SelectedTabTextColor})
+							Tween(btn, {BackgroundColor3 = SelectedTheme.TabBackgroundSelected}, 0.2)
+							Tween(btn.Title, {TextColor3 = SelectedTheme.SelectedTabTextColor}, 0.2)
 						else
-							Tween(btn, {BackgroundColor3 = SelectedTheme.TabBackground})
-							Tween(btn.Title, {TextColor3 = SelectedTheme.TabTextColor})
+							Tween(btn, {BackgroundColor3 = SelectedTheme.TabBackground}, 0.2)
+							Tween(btn.Title, {TextColor3 = SelectedTheme.TabTextColor}, 0.2)
 						end
 					end
 				end
@@ -1033,97 +795,53 @@ function MercuryLibrary:CreateWindow(Settings)
 		local Tab = {
 			Name = Name,
 			Elements = {},
-			Window = Window,
-			Index = #Window.Tabs + 1
+			Window = Window
 		}
 		
-		-- Tab button
-		local TabButton = Instance.new("Frame")
+		-- Create tab button
+		local TabButton = TabList.Template:Clone()
 		TabButton.Name = Name
-		TabButton.BackgroundColor3 = SelectedTheme.TabBackground
-		TabButton.BorderSizePixel = 0
-		TabButton.Size = UDim2.new(1, 0, 0, 35)
+		TabButton.Title.Text = Name
+		TabButton.Visible = true
 		TabButton.Parent = TabList
 		
-		local TabCorner = Instance.new("UICorner")
-		TabCorner.CornerRadius = UDim.new(0, 6)
-		TabCorner.Parent = TabButton
+		-- Apply theme
+		TabButton.BackgroundColor3 = SelectedTheme.TabBackground
+		TabButton.Title.TextColor3 = SelectedTheme.TabTextColor
 		
-		local TabStroke = Instance.new("UIStroke")
-		TabStroke.Color = SelectedTheme.TabStroke
-		TabStroke.Thickness = 1
-		TabStroke.Parent = TabButton
-		
-		local TabTitle = Instance.new("TextLabel")
-		TabTitle.Name = "Title"
-		TabTitle.BackgroundTransparency = 1
-		TabTitle.Size = UDim2.new(1, -10, 1, 0)
-		TabTitle.Position = UDim2.new(0, 10, 0, 0)
-		TabTitle.Font = Enum.Font.GothamSemibold
-		TabTitle.Text = Name
-		TabTitle.TextColor3 = SelectedTheme.TabTextColor
-		TabTitle.TextSize = 13
-		TabTitle.TextXAlignment = Enum.TextXAlignment.Left
-		TabTitle.Parent = TabButton
-		
-		local TabInteract = Instance.new("TextButton")
-		TabInteract.Name = "Interact"
-		TabInteract.BackgroundTransparency = 1
-		TabInteract.Size = UDim2.new(1, 0, 1, 0)
-		TabInteract.Text = ""
-		TabInteract.Parent = TabButton
-		
-		-- Tab page
-		local TabPage = Instance.new("ScrollingFrame")
+		-- Create tab page
+		local TabPage = Elements.Template:Clone()
 		TabPage.Name = Name
-		TabPage.BackgroundTransparency = 1
-		TabPage.BorderSizePixel = 0
-		TabPage.Size = UDim2.new(1, 0, 1, 0)
-		TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
-		TabPage.ScrollBarThickness = 4
-		TabPage.ScrollBarImageColor3 = SelectedTheme.ElementStroke
-		TabPage.LayoutOrder = Tab.Index
+		TabPage.Visible = true
 		TabPage.Parent = Elements
-		
-		local PageLayout = Instance.new("UIListLayout")
-		PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		PageLayout.Padding = UDim.new(0, 8)
-		PageLayout.Parent = TabPage
-		
-		local PagePadding = Instance.new("UIPadding")
-		PagePadding.PaddingLeft = UDim.new(0, 10)
-		PagePadding.PaddingRight = UDim.new(0, 10)
-		PagePadding.PaddingTop = UDim.new(0, 10)
-		PagePadding.PaddingBottom = UDim.new(0, 10)
-		PagePadding.Parent = TabPage
-		
-		PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
-		end)
 		
 		Tab.Button = TabButton
 		Tab.Page = TabPage
 		
 		table.insert(Window.Tabs, Tab)
 		
-		-- Hover effect
-		TabInteract.MouseEnter:Connect(function()
-			if Window.CurrentTab ~= Tab then
-				Tween(TabButton, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
-			end
-		end)
-		
-		TabInteract.MouseLeave:Connect(function()
-			if Window.CurrentTab ~= Tab then
-				Tween(TabButton, {BackgroundColor3 = SelectedTheme.TabBackground})
-			end
-		end)
-		
-		TabInteract.MouseButton1Click:Connect(function()
-			RippleEffect(TabButton, TabButton.AbsoluteSize.X / 2, TabButton.AbsoluteSize.Y / 2)
+		-- Tab button click with ripple
+		TabButton.Interact.MouseButton1Click:Connect(function()
+			local mousePos = UserInputService:GetMouseLocation()
+			local buttonPos = TabButton.AbsolutePosition
+			RippleEffect(TabButton, mousePos.X - buttonPos.X, mousePos.Y - buttonPos.Y)
 			Window:SelectTab(Name)
 		end)
 		
+		-- Hover effects
+		TabButton.Interact.MouseEnter:Connect(function()
+			if Window.CurrentTab ~= Tab then
+				Tween(TabButton, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
+			end
+		end)
+		
+		TabButton.Interact.MouseLeave:Connect(function()
+			if Window.CurrentTab ~= Tab then
+				Tween(TabButton, {BackgroundColor3 = SelectedTheme.TabBackground}, 0.2)
+			end
+		end)
+		
+		-- Auto-select first tab
 		if #Window.Tabs == 1 then
 			Window:SelectTab(Name)
 		end
@@ -1135,29 +853,16 @@ function MercuryLibrary:CreateWindow(Settings)
 		function Tab:CreateLabel(Text, Settings)
 			Settings = Settings or {}
 			
-			local Label = Instance.new("Frame")
-			Label.Name = "Label"
-			Label.BackgroundColor3 = Settings.Color or SelectedTheme.ElementBackground
-			Label.BorderSizePixel = 0
-			Label.Size = UDim2.new(1, 0, 0, 40)
+			local Label = TabPage.Label:Clone()
+			Label.Title.Text = Text
+			Label.Visible = true
 			Label.Parent = TabPage
 			
-			local LabelCorner = Instance.new("UICorner")
-			LabelCorner.CornerRadius = UDim.new(0, 6)
-			LabelCorner.Parent = Label
-			
-			local LabelTitle = Instance.new("TextLabel")
-			LabelTitle.Name = "Title"
-			LabelTitle.BackgroundTransparency = 1
-			LabelTitle.Position = UDim2.new(0, 15, 0, 0)
-			LabelTitle.Size = UDim2.new(1, -30, 1, 0)
-			LabelTitle.Font = Enum.Font.Gotham
-			LabelTitle.Text = Text
-			LabelTitle.TextColor3 = SelectedTheme.TextColor
-			LabelTitle.TextSize = 13
-			LabelTitle.TextXAlignment = Enum.TextXAlignment.Left
-			LabelTitle.TextWrapped = true
-			LabelTitle.Parent = Label
+			if Settings.Color then
+				Label.BackgroundColor3 = Settings.Color
+			else
+				Label.BackgroundColor3 = SelectedTheme.ElementBackground
+			end
 			
 			local LabelValue = {
 				Type = "Label",
@@ -1166,20 +871,43 @@ function MercuryLibrary:CreateWindow(Settings)
 			}
 			
 			function LabelValue:Set(NewText, NewColor)
-				LabelTitle.Text = NewText
+				-- Animate text change
+				Tween(Label.Title, {TextTransparency = 1}, 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, function()
+					Label.Title.Text = NewText
+					Tween(Label.Title, {TextTransparency = 0}, 0.15)
+				end)
+				
 				if NewColor then
-					Tween(Label, {BackgroundColor3 = NewColor})
+					Tween(Label, {BackgroundColor3 = NewColor}, 0.3)
 				end
 			end
 			
 			function LabelValue:SetVisible(Visible)
 				LabelValue.Visible = Visible
-				Label.Visible = Visible
+				if Visible then
+					Label.Visible = true
+					Tween(Label, {BackgroundTransparency = 0}, 0.3)
+					Tween(Label.Title, {TextTransparency = 0}, 0.3)
+				else
+					Tween(Label, {BackgroundTransparency = 1}, 0.3)
+					Tween(Label.Title, {TextTransparency = 1}, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, function()
+						Label.Visible = false
+					end)
+				end
+			end
+			
+			function LabelValue:Flash(Times, Speed)
+				Times = Times or 3
+				Speed = Speed or 0.3
+				for i = 1, Times do
+					Tween(Label, {BackgroundColor3 = SelectedTheme.AccentColor}, Speed / 2)
+					task.wait(Speed / 2)
+					Tween(Label, {BackgroundColor3 = SelectedTheme.ElementBackground}, Speed / 2)
+					task.wait(Speed / 2)
+				end
 			end
 			
 			function LabelValue:Remove()
-				Tween(Label, {Size = UDim2.new(1, 0, 0, 0)}, 0.3)
-				task.wait(0.3)
 				Label:Destroy()
 			end
 			
@@ -1188,40 +916,13 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateButton(ButtonSettings)
-			local Button = Instance.new("Frame")
+			local Button = TabPage.Button:Clone()
 			Button.Name = ButtonSettings.Name
-			Button.BackgroundColor3 = SelectedTheme.ElementBackground
-			Button.BorderSizePixel = 0
-			Button.Size = UDim2.new(1, 0, 0, 40)
+			Button.Title.Text = ButtonSettings.Name
+			Button.Visible = true
 			Button.Parent = TabPage
 			
-			local ButtonCorner = Instance.new("UICorner")
-			ButtonCorner.CornerRadius = UDim.new(0, 6)
-			ButtonCorner.Parent = Button
-			
-			local ButtonStroke = Instance.new("UIStroke")
-			ButtonStroke.Color = SelectedTheme.ElementStroke
-			ButtonStroke.Thickness = 1
-			ButtonStroke.Parent = Button
-			
-			local ButtonTitle = Instance.new("TextLabel")
-			ButtonTitle.Name = "Title"
-			ButtonTitle.BackgroundTransparency = 1
-			ButtonTitle.Position = UDim2.new(0, 15, 0, 0)
-			ButtonTitle.Size = UDim2.new(1, -30, 1, 0)
-			ButtonTitle.Font = Enum.Font.GothamSemibold
-			ButtonTitle.Text = ButtonSettings.Name
-			ButtonTitle.TextColor3 = SelectedTheme.TextColor
-			ButtonTitle.TextSize = 13
-			ButtonTitle.TextXAlignment = Enum.TextXAlignment.Center
-			ButtonTitle.Parent = Button
-			
-			local ButtonInteract = Instance.new("TextButton")
-			ButtonInteract.Name = "Interact"
-			ButtonInteract.BackgroundTransparency = 1
-			ButtonInteract.Size = UDim2.new(1, 0, 1, 0)
-			ButtonInteract.Text = ""
-			ButtonInteract.Parent = Button
+			Button.BackgroundColor3 = SelectedTheme.ElementBackground
 			
 			local ButtonValue = {
 				Type = "Button",
@@ -1230,22 +931,24 @@ function MercuryLibrary:CreateWindow(Settings)
 				Locked = false
 			}
 			
-			ButtonInteract.MouseEnter:Connect(function()
+			Button.Interact.MouseEnter:Connect(function()
 				if not ButtonValue.Locked then
-					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
+					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
 				end
 			end)
 			
-			ButtonInteract.MouseLeave:Connect(function()
+			Button.Interact.MouseLeave:Connect(function()
 				if not ButtonValue.Locked then
-					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackground})
+					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
 				end
 			end)
 			
-			ButtonInteract.MouseButton1Click:Connect(function()
+			Button.Interact.MouseButton1Click:Connect(function()
 				if ButtonValue.Locked then return end
 				
-				RippleEffect(Button, ButtonInteract.AbsolutePosition.X - Button.AbsolutePosition.X + ButtonInteract.AbsoluteSize.X / 2, ButtonInteract.AbsolutePosition.Y - Button.AbsolutePosition.Y + ButtonInteract.AbsoluteSize.Y / 2)
+				local mousePos = UserInputService:GetMouseLocation()
+				local buttonPos = Button.AbsolutePosition
+				RippleEffect(Button, mousePos.X - buttonPos.X, mousePos.Y - buttonPos.Y)
 				
 				local success, err = pcall(ButtonValue.Callback)
 				if not success then
@@ -1254,7 +957,7 @@ function MercuryLibrary:CreateWindow(Settings)
 			end)
 			
 			function ButtonValue:Set(NewName)
-				ButtonTitle.Text = NewName
+				Button.Title.Text = NewName
 			end
 			
 			function ButtonValue:SetCallback(NewCallback)
@@ -1264,17 +967,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function ButtonValue:SetLocked(Locked)
 				ButtonValue.Locked = Locked
 				if Locked then
-					Tween(Button, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(ButtonTitle, {TextTransparency = 0.5})
+					Tween(Button, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Button.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(ButtonTitle, {TextTransparency = 0})
+					Tween(Button, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Button.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function ButtonValue:Remove()
-				Tween(Button, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Button:Destroy()
 			end
 			
@@ -1283,74 +984,13 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateToggle(ToggleSettings)
-			local Toggle = Instance.new("Frame")
+			local Toggle = TabPage.Toggle:Clone()
 			Toggle.Name = ToggleSettings.Name
-			Toggle.BackgroundColor3 = SelectedTheme.ElementBackground
-			Toggle.BorderSizePixel = 0
-			Toggle.Size = UDim2.new(1, 0, 0, 40)
+			Toggle.Title.Text = ToggleSettings.Name
+			Toggle.Visible = true
 			Toggle.Parent = TabPage
 			
-			local ToggleCorner = Instance.new("UICorner")
-			ToggleCorner.CornerRadius = UDim.new(0, 6)
-			ToggleCorner.Parent = Toggle
-			
-			local ToggleStroke = Instance.new("UIStroke")
-			ToggleStroke.Color = SelectedTheme.ElementStroke
-			ToggleStroke.Thickness = 1
-			ToggleStroke.Parent = Toggle
-			
-			local ToggleTitle = Instance.new("TextLabel")
-			ToggleTitle.Name = "Title"
-			ToggleTitle.BackgroundTransparency = 1
-			ToggleTitle.Position = UDim2.new(0, 15, 0, 0)
-			ToggleTitle.Size = UDim2.new(1, -70, 1, 0)
-			ToggleTitle.Font = Enum.Font.GothamSemibold
-			ToggleTitle.Text = ToggleSettings.Name
-			ToggleTitle.TextColor3 = SelectedTheme.TextColor
-			ToggleTitle.TextSize = 13
-			ToggleTitle.TextXAlignment = Enum.TextXAlignment.Left
-			ToggleTitle.Parent = Toggle
-			
-			local ToggleFrame = Instance.new("Frame")
-			ToggleFrame.Name = "ToggleFrame"
-			ToggleFrame.BackgroundColor3 = SelectedTheme.ToggleBackground
-			ToggleFrame.BorderSizePixel = 0
-			ToggleFrame.Position = UDim2.new(1, -55, 0.5, -10)
-			ToggleFrame.Size = UDim2.new(0, 45, 0, 20)
-			ToggleFrame.Parent = Toggle
-			
-			local ToggleFrameCorner = Instance.new("UICorner")
-			ToggleFrameCorner.CornerRadius = UDim.new(1, 0)
-			ToggleFrameCorner.Parent = ToggleFrame
-			
-			local ToggleFrameStroke = Instance.new("UIStroke")
-			ToggleFrameStroke.Color = SelectedTheme.ToggleDisabledStroke
-			ToggleFrameStroke.Thickness = 1
-			ToggleFrameStroke.Parent = ToggleFrame
-			
-			local Indicator = Instance.new("Frame")
-			Indicator.Name = "Indicator"
-			Indicator.BackgroundColor3 = SelectedTheme.ToggleDisabled
-			Indicator.BorderSizePixel = 0
-			Indicator.Position = UDim2.new(0, 2, 0.5, -8)
-			Indicator.Size = UDim2.new(0, 16, 0, 16)
-			Indicator.Parent = ToggleFrame
-			
-			local IndicatorCorner = Instance.new("UICorner")
-			IndicatorCorner.CornerRadius = UDim.new(1, 0)
-			IndicatorCorner.Parent = Indicator
-			
-			local IndicatorStroke = Instance.new("UIStroke")
-			IndicatorStroke.Color = SelectedTheme.ToggleDisabledOuterStroke
-			IndicatorStroke.Thickness = 2
-			IndicatorStroke.Parent = Indicator
-			
-			local ToggleInteract = Instance.new("TextButton")
-			ToggleInteract.Name = "Interact"
-			ToggleInteract.BackgroundTransparency = 1
-			ToggleInteract.Size = UDim2.new(1, 0, 1, 0)
-			ToggleInteract.Text = ""
-			ToggleInteract.Parent = Toggle
+			Toggle.BackgroundColor3 = SelectedTheme.ElementBackground
 			
 			ToggleSettings.CurrentValue = ToggleSettings.CurrentValue or false
 			ToggleSettings.Type = "Toggle"
@@ -1365,41 +1005,67 @@ function MercuryLibrary:CreateWindow(Settings)
 			}
 			
 			local function UpdateVisual()
-				if ToggleValue.CurrentValue then
-					Tween(Indicator, {
-						Position = UDim2.new(1, -18, 0.5, -8),
-						BackgroundColor3 = SelectedTheme.ToggleEnabled
-					})
-					Tween(IndicatorStroke, {Color = SelectedTheme.ToggleEnabledOuterStroke})
-					Tween(ToggleFrameStroke, {Color = SelectedTheme.ToggleEnabledStroke})
-				else
-					Tween(Indicator, {
-						Position = UDim2.new(0, 2, 0.5, -8),
-						BackgroundColor3 = SelectedTheme.ToggleDisabled
-					})
-					Tween(IndicatorStroke, {Color = SelectedTheme.ToggleDisabledOuterStroke})
-					Tween(ToggleFrameStroke, {Color = SelectedTheme.ToggleDisabledStroke})
+				local ToggleFrame = Toggle:FindFirstChild("ToggleFrame")
+				if ToggleFrame then
+					local Indicator = ToggleFrame:FindFirstChild("Indicator")
+					if Indicator then
+						if ToggleValue.CurrentValue then
+							Tween(Indicator, {
+								Position = UDim2.new(1, -18, 0.5, -8),
+								BackgroundColor3 = SelectedTheme.ToggleEnabled
+							}, 0.2)
+							if Indicator:FindFirstChild("UIStroke") then
+								Tween(Indicator.UIStroke, {Color = SelectedTheme.ToggleEnabledOuterStroke}, 0.2)
+							end
+							if ToggleFrame:FindFirstChild("UIStroke") then
+								Tween(ToggleFrame.UIStroke, {Color = SelectedTheme.ToggleEnabledStroke}, 0.2)
+							end
+						else
+							Tween(Indicator, {
+								Position = UDim2.new(0, 2, 0.5, -8),
+								BackgroundColor3 = SelectedTheme.ToggleDisabled
+							}, 0.2)
+							if Indicator:FindFirstChild("UIStroke") then
+								Tween(Indicator.UIStroke, {Color = SelectedTheme.ToggleDisabledOuterStroke}, 0.2)
+							end
+							if ToggleFrame:FindFirstChild("UIStroke") then
+								Tween(ToggleFrame.UIStroke, {Color = SelectedTheme.ToggleDisabledStroke}, 0.2)
+							end
+						end
+					end
 				end
 			end
 			
 			UpdateVisual()
 			
-			ToggleInteract.MouseEnter:Connect(function()
+			Toggle.Interact.MouseEnter:Connect(function()
 				if not ToggleValue.Locked then
-					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
+					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
+					Tween(Toggle, {Size = UDim2.new(1, 3, 0, 40)}, 0.12)
 				end
 			end)
 			
-			ToggleInteract.MouseLeave:Connect(function()
+			Toggle.Interact.MouseLeave:Connect(function()
 				if not ToggleValue.Locked then
-					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackground})
+					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
+					Tween(Toggle, {Size = UDim2.new(1, 0, 0, 40)}, 0.12)
 				end
 			end)
 			
-			ToggleInteract.MouseButton1Click:Connect(function()
+			Toggle.Interact.MouseButton1Click:Connect(function()
 				if ToggleValue.Locked then return end
 				
 				ToggleValue.CurrentValue = not ToggleValue.CurrentValue
+				
+				-- Bounce effect on toggle
+				local toggleFrame = Toggle:FindFirstChild("ToggleFrame")
+				if toggleFrame then
+					local origSize = toggleFrame.Size
+					Tween(toggleFrame, {Size = origSize * 1.1}, 0.1)
+					task.wait(0.1)
+					Tween(toggleFrame, {Size = origSize}, 0.1)
+				end
+				
 				UpdateVisual()
 				
 				local success, err = pcall(ToggleValue.Callback, ToggleValue.CurrentValue)
@@ -1430,17 +1096,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function ToggleValue:SetLocked(Locked)
 				ToggleValue.Locked = Locked
 				if Locked then
-					Tween(Toggle, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(ToggleTitle, {TextTransparency = 0.5})
+					Tween(Toggle, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Toggle.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(ToggleTitle, {TextTransparency = 0})
+					Tween(Toggle, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Toggle.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function ToggleValue:Remove()
-				Tween(Toggle, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Toggle:Destroy()
 			end
 			
@@ -1453,81 +1117,15 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateSlider(SliderSettings)
-			local Slider = Instance.new("Frame")
+			local Slider = TabPage.Slider:Clone()
 			Slider.Name = SliderSettings.Name
-			Slider.BackgroundColor3 = SelectedTheme.ElementBackground
-			Slider.BorderSizePixel = 0
-			Slider.Size = UDim2.new(1, 0, 0, 60)
+			Slider.Title.Text = SliderSettings.Name
+			Slider.Visible = true
 			Slider.Parent = TabPage
 			
-			local SliderCorner = Instance.new("UICorner")
-			SliderCorner.CornerRadius = UDim.new(0, 6)
-			SliderCorner.Parent = Slider
-			
-			local SliderStroke = Instance.new("UIStroke")
-			SliderStroke.Color = SelectedTheme.ElementStroke
-			SliderStroke.Thickness = 1
-			SliderStroke.Parent = Slider
-			
-			local SliderTitle = Instance.new("TextLabel")
-			SliderTitle.Name = "Title"
-			SliderTitle.BackgroundTransparency = 1
-			SliderTitle.Position = UDim2.new(0, 15, 0, 8)
-			SliderTitle.Size = UDim2.new(1, -30, 0, 20)
-			SliderTitle.Font = Enum.Font.GothamSemibold
-			SliderTitle.Text = SliderSettings.Name
-			SliderTitle.TextColor3 = SelectedTheme.TextColor
-			SliderTitle.TextSize = 13
-			SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-			SliderTitle.Parent = Slider
-			
-			local SliderMain = Instance.new("Frame")
-			SliderMain.Name = "Main"
-			SliderMain.BackgroundColor3 = SelectedTheme.SecondaryElementBackground
-			SliderMain.BorderSizePixel = 0
-			SliderMain.Position = UDim2.new(0, 15, 1, -22)
-			SliderMain.Size = UDim2.new(1, -30, 0, 8)
-			SliderMain.Parent = Slider
-			
-			local SliderMainCorner = Instance.new("UICorner")
-			SliderMainCorner.CornerRadius = UDim.new(1, 0)
-			SliderMainCorner.Parent = SliderMain
-			
-			local Progress = Instance.new("Frame")
-			Progress.Name = "Progress"
-			Progress.BackgroundColor3 = SelectedTheme.SliderProgress
-			Progress.BorderSizePixel = 0
-			Progress.Size = UDim2.new(0.5, 0, 1, 0)
-			Progress.Parent = SliderMain
-			
-			local ProgressCorner = Instance.new("UICorner")
-			ProgressCorner.CornerRadius = UDim.new(1, 0)
-			ProgressCorner.Parent = Progress
-			
-			local ProgressStroke = Instance.new("UIStroke")
-			ProgressStroke.Color = SelectedTheme.SliderStroke
-			ProgressStroke.Thickness = 1
-			ProgressStroke.Parent = Progress
-			
-			local Info = Instance.new("TextLabel")
-			Info.Name = "Information"
-			Info.BackgroundTransparency = 1
-			Info.Position = UDim2.new(1, -60, 0, 8)
-			Info.Size = UDim2.new(0, 60, 0, 20)
-			Info.Font = Enum.Font.GothamSemibold
-			Info.Text = "50"
-			Info.TextColor3 = SelectedTheme.TextColor
-			Info.TextSize = 12
-			Info.TextXAlignment = Enum.TextXAlignment.Right
-			Info.Parent = Slider
-			
-			local SliderInteract = Instance.new("TextButton")
-			SliderInteract.Name = "Interact"
-			SliderInteract.BackgroundTransparency = 1
-			SliderInteract.Position = UDim2.new(0, 15, 0, 30)
-			SliderInteract.Size = UDim2.new(1, -30, 0, 20)
-			SliderInteract.Text = ""
-			SliderInteract.Parent = Slider
+			Slider.BackgroundColor3 = SelectedTheme.ElementBackground
+			Slider.Main.BackgroundColor3 = SelectedTheme.SliderBackground
+			Slider.Main.Progress.BackgroundColor3 = SelectedTheme.SliderProgress
 			
 			SliderSettings.CurrentValue = SliderSettings.CurrentValue or SliderSettings.Range[1]
 			SliderSettings.Range = SliderSettings.Range or {0, 100}
@@ -1536,6 +1134,9 @@ function MercuryLibrary:CreateWindow(Settings)
 			SliderSettings.Callback = SliderSettings.Callback or function() end
 			
 			local Dragging = false
+			local SliderMain = Slider.Main
+			local Progress = SliderMain.Progress
+			local Info = SliderMain.Information
 			
 			local SliderValue = {
 				Type = "Slider",
@@ -1562,18 +1163,18 @@ function MercuryLibrary:CreateWindow(Settings)
 			
 			UpdateSlider(SliderSettings.CurrentValue)
 			
-			SliderInteract.InputBegan:Connect(function(input)
+			SliderMain.Interact.InputBegan:Connect(function(input)
 				if SliderValue.Locked then return end
 				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 					Dragging = true
-					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
+					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
 				end
 			end)
 			
-			SliderInteract.InputEnded:Connect(function(input)
+			SliderMain.Interact.InputEnded:Connect(function(input)
 				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 					Dragging = false
-					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackground})
+					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
 				end
 			end)
 			
@@ -1624,17 +1225,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function SliderValue:SetLocked(Locked)
 				SliderValue.Locked = Locked
 				if Locked then
-					Tween(Slider, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(SliderTitle, {TextTransparency = 0.5})
+					Tween(Slider, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Slider.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(SliderTitle, {TextTransparency = 0})
+					Tween(Slider, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Slider.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function SliderValue:Remove()
-				Tween(Slider, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Slider:Destroy()
 			end
 			
@@ -1647,85 +1246,13 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateDropdown(DropdownSettings)
-			local Dropdown = Instance.new("Frame")
+			local Dropdown = TabPage.Dropdown:Clone()
 			Dropdown.Name = DropdownSettings.Name
-			Dropdown.BackgroundColor3 = SelectedTheme.ElementBackground
-			Dropdown.BorderSizePixel = 0
-			Dropdown.Size = UDim2.new(1, 0, 0, 40)
+			Dropdown.Title.Text = DropdownSettings.Name
+			Dropdown.Visible = true
 			Dropdown.Parent = TabPage
-			Dropdown.ClipsDescendants = true
 			
-			local DropdownCorner = Instance.new("UICorner")
-			DropdownCorner.CornerRadius = UDim.new(0, 6)
-			DropdownCorner.Parent = Dropdown
-			
-			local DropdownStroke = Instance.new("UIStroke")
-			DropdownStroke.Color = SelectedTheme.ElementStroke
-			DropdownStroke.Thickness = 1
-			DropdownStroke.Parent = Dropdown
-			
-			local DropdownTitle = Instance.new("TextLabel")
-			DropdownTitle.Name = "Title"
-			DropdownTitle.BackgroundTransparency = 1
-			DropdownTitle.Position = UDim2.new(0, 15, 0, 0)
-			DropdownTitle.Size = UDim2.new(1, -60, 0, 40)
-			DropdownTitle.Font = Enum.Font.GothamSemibold
-			DropdownTitle.Text = DropdownSettings.Name
-			DropdownTitle.TextColor3 = SelectedTheme.TextColor
-			DropdownTitle.TextSize = 13
-			DropdownTitle.TextXAlignment = Enum.TextXAlignment.Left
-			DropdownTitle.Parent = Dropdown
-			
-			local Selected = Instance.new("TextLabel")
-			Selected.Name = "Selected"
-			Selected.BackgroundTransparency = 1
-			Selected.Position = UDim2.new(1, -150, 0, 0)
-			Selected.Size = UDim2.new(0, 130, 0, 40)
-			Selected.Font = Enum.Font.Gotham
-			Selected.Text = "None"
-			Selected.TextColor3 = SelectedTheme.PlaceholderColor
-			Selected.TextSize = 12
-			Selected.TextXAlignment = Enum.TextXAlignment.Right
-			Selected.Parent = Dropdown
-			
-			local Arrow = Instance.new("TextLabel")
-			Arrow.Name = "Arrow"
-			Arrow.BackgroundTransparency = 1
-			Arrow.Position = UDim2.new(1, -20, 0, 0)
-			Arrow.Size = UDim2.new(0, 20, 0, 40)
-			Arrow.Font = Enum.Font.GothamBold
-			Arrow.Text = "▼"
-			Arrow.TextColor3 = SelectedTheme.TextColor
-			Arrow.TextSize = 10
-			Arrow.Parent = Dropdown
-			
-			local DropdownInteract = Instance.new("TextButton")
-			DropdownInteract.Name = "Interact"
-			DropdownInteract.BackgroundTransparency = 1
-			DropdownInteract.Size = UDim2.new(1, 0, 0, 40)
-			DropdownInteract.Text = ""
-			DropdownInteract.ZIndex = 10
-			DropdownInteract.Parent = Dropdown
-			
-			local DropdownList = Instance.new("ScrollingFrame")
-			DropdownList.Name = "List"
-			DropdownList.BackgroundTransparency = 1
-			DropdownList.Position = UDim2.new(0, 0, 0, 45)
-			DropdownList.Size = UDim2.new(1, 0, 0, 0)
-			DropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
-			DropdownList.ScrollBarThickness = 4
-			DropdownList.ScrollBarImageColor3 = SelectedTheme.ElementStroke
-			DropdownList.Visible = false
-			DropdownList.Parent = Dropdown
-			
-			local ListLayout = Instance.new("UIListLayout")
-			ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			ListLayout.Padding = UDim.new(0, 2)
-			ListLayout.Parent = DropdownList
-			
-			ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-				DropdownList.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y)
-			end)
+			Dropdown.BackgroundColor3 = SelectedTheme.ElementBackground
 			
 			DropdownSettings.CurrentOption = DropdownSettings.CurrentOption or {}
 			DropdownSettings.Options = DropdownSettings.Options or {}
@@ -1737,6 +1264,9 @@ function MercuryLibrary:CreateWindow(Settings)
 				DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
 			end
 			
+			local DropdownList = Dropdown.List
+			local Selected = Dropdown.Selected
+			local Arrow = Dropdown.Arrow
 			local IsOpen = false
 			
 			local DropdownValue = {
@@ -1764,51 +1294,29 @@ function MercuryLibrary:CreateWindow(Settings)
 			
 			local function CreateOptions()
 				for _, child in ipairs(DropdownList:GetChildren()) do
-					if child:IsA("Frame") then
+					if child:IsA("Frame") and child.Name ~= "Template" then
 						child:Destroy()
 					end
 				end
 				
 				for _, option in ipairs(DropdownValue.Options) do
-					local OptionFrame = Instance.new("Frame")
+					local OptionFrame = DropdownList.Template:Clone()
 					OptionFrame.Name = option
-					OptionFrame.BackgroundColor3 = SelectedTheme.DropdownUnselected
-					OptionFrame.BorderSizePixel = 0
-					OptionFrame.Size = UDim2.new(1, -10, 0, 30)
+					OptionFrame.Title.Text = option
+					OptionFrame.Visible = true
 					OptionFrame.Parent = DropdownList
-					
-					local OptionCorner = Instance.new("UICorner")
-					OptionCorner.CornerRadius = UDim.new(0, 4)
-					OptionCorner.Parent = OptionFrame
-					
-					local OptionTitle = Instance.new("TextLabel")
-					OptionTitle.Name = "Title"
-					OptionTitle.BackgroundTransparency = 1
-					OptionTitle.Position = UDim2.new(0, 10, 0, 0)
-					OptionTitle.Size = UDim2.new(1, -20, 1, 0)
-					OptionTitle.Font = Enum.Font.Gotham
-					OptionTitle.Text = option
-					OptionTitle.TextColor3 = SelectedTheme.TextColor
-					OptionTitle.TextSize = 12
-					OptionTitle.TextXAlignment = Enum.TextXAlignment.Left
-					OptionTitle.Parent = OptionFrame
-					
-					local OptionInteract = Instance.new("TextButton")
-					OptionInteract.Name = "Interact"
-					OptionInteract.BackgroundTransparency = 1
-					OptionInteract.Size = UDim2.new(1, 0, 1, 0)
-					OptionInteract.Text = ""
-					OptionInteract.Parent = OptionFrame
 					
 					if table.find(DropdownValue.CurrentOption, option) then
 						OptionFrame.BackgroundColor3 = SelectedTheme.DropdownSelected
+					else
+						OptionFrame.BackgroundColor3 = SelectedTheme.DropdownUnselected
 					end
 					
-					OptionInteract.MouseEnter:Connect(function()
+					OptionFrame.Interact.MouseEnter:Connect(function()
 						Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
 					end)
 					
-					OptionInteract.MouseLeave:Connect(function()
+					OptionFrame.Interact.MouseLeave:Connect(function()
 						if table.find(DropdownValue.CurrentOption, option) then
 							Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.DropdownSelected}, 0.2)
 						else
@@ -1816,25 +1324,27 @@ function MercuryLibrary:CreateWindow(Settings)
 						end
 					end)
 					
-					OptionInteract.MouseButton1Click:Connect(function()
+					OptionFrame.Interact.MouseButton1Click:Connect(function()
 						if DropdownValue.Locked then return end
 						
-						RippleEffect(OptionFrame, OptionInteract.AbsolutePosition.X - OptionFrame.AbsolutePosition.X + OptionInteract.AbsoluteSize.X / 2, OptionInteract.AbsolutePosition.Y - OptionFrame.AbsolutePosition.Y + OptionInteract.AbsoluteSize.Y / 2)
+						local mousePos = UserInputService:GetMouseLocation()
+						local framePos = OptionFrame.AbsolutePosition
+						RippleEffect(OptionFrame, mousePos.X - framePos.X, mousePos.Y - framePos.Y)
 						
 						if table.find(DropdownValue.CurrentOption, option) then
 							table.remove(DropdownValue.CurrentOption, table.find(DropdownValue.CurrentOption, option))
-							Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.DropdownUnselected})
+							Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.DropdownUnselected}, 0.2)
 						else
 							if not DropdownValue.MultipleOptions then
 								table.clear(DropdownValue.CurrentOption)
 								for _, optFrame in ipairs(DropdownList:GetChildren()) do
-									if optFrame:IsA("Frame") then
-										Tween(optFrame, {BackgroundColor3 = SelectedTheme.DropdownUnselected})
+									if optFrame:IsA("Frame") and optFrame.Name ~= "Template" then
+										Tween(optFrame, {BackgroundColor3 = SelectedTheme.DropdownUnselected}, 0.2)
 									end
 								end
 							end
 							table.insert(DropdownValue.CurrentOption, option)
-							Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.DropdownSelected})
+							Tween(OptionFrame, {BackgroundColor3 = SelectedTheme.DropdownSelected}, 0.2)
 						end
 						
 						UpdateText()
@@ -1848,7 +1358,6 @@ function MercuryLibrary:CreateWindow(Settings)
 							task.wait(0.1)
 							IsOpen = false
 							DropdownList.Visible = false
-							Tween(Dropdown, {Size = UDim2.new(1, 0, 0, 40)})
 							Tween(Arrow, {Rotation = 0}, 0.2)
 						end
 					end)
@@ -1858,32 +1367,27 @@ function MercuryLibrary:CreateWindow(Settings)
 			CreateOptions()
 			UpdateText()
 			
-			DropdownInteract.MouseEnter:Connect(function()
+			Dropdown.Interact.MouseEnter:Connect(function()
 				if not DropdownValue.Locked then
-					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
+					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
 				end
 			end)
 			
-			DropdownInteract.MouseLeave:Connect(function()
+			Dropdown.Interact.MouseLeave:Connect(function()
 				if not DropdownValue.Locked then
-					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackground})
+					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
 				end
 			end)
 			
-			DropdownInteract.MouseButton1Click:Connect(function()
+			Dropdown.Interact.MouseButton1Click:Connect(function()
 				if DropdownValue.Locked then return end
 				
 				IsOpen = not IsOpen
 				DropdownList.Visible = IsOpen
 				
 				if IsOpen then
-					local maxHeight = math.min(#DropdownValue.Options * 32, 150)
-					Tween(Dropdown, {Size = UDim2.new(1, 0, 0, 45 + maxHeight)})
-					Tween(DropdownList, {Size = UDim2.new(1, 0, 0, maxHeight)}, 0.3)
 					Tween(Arrow, {Rotation = 180}, 0.2)
 				else
-					Tween(Dropdown, {Size = UDim2.new(1, 0, 0, 40)})
-					Tween(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.3)
 					Tween(Arrow, {Rotation = 0}, 0.2)
 				end
 			end)
@@ -1919,17 +1423,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function DropdownValue:SetLocked(Locked)
 				DropdownValue.Locked = Locked
 				if Locked then
-					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(DropdownTitle, {TextTransparency = 0.5})
+					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Dropdown.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(DropdownTitle, {TextTransparency = 0})
+					Tween(Dropdown, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Dropdown.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function DropdownValue:Remove()
-				Tween(Dropdown, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Dropdown:Destroy()
 			end
 			
@@ -1942,69 +1444,22 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateInput(InputSettings)
-			local Input = Instance.new("Frame")
+			local Input = TabPage.Input:Clone()
 			Input.Name = InputSettings.Name
-			Input.BackgroundColor3 = SelectedTheme.ElementBackground
-			Input.BorderSizePixel = 0
-			Input.Size = UDim2.new(1, 0, 0, 70)
+			Input.Title.Text = InputSettings.Name
+			Input.Visible = true
 			Input.Parent = TabPage
 			
-			local InputCorner = Instance.new("UICorner")
-			InputCorner.CornerRadius = UDim.new(0, 6)
-			InputCorner.Parent = Input
-			
-			local InputStroke = Instance.new("UIStroke")
-			InputStroke.Color = SelectedTheme.ElementStroke
-			InputStroke.Thickness = 1
-			InputStroke.Parent = Input
-			
-			local InputTitle = Instance.new("TextLabel")
-			InputTitle.Name = "Title"
-			InputTitle.BackgroundTransparency = 1
-			InputTitle.Position = UDim2.new(0, 15, 0, 8)
-			InputTitle.Size = UDim2.new(1, -30, 0, 20)
-			InputTitle.Font = Enum.Font.GothamSemibold
-			InputTitle.Text = InputSettings.Name
-			InputTitle.TextColor3 = SelectedTheme.TextColor
-			InputTitle.TextSize = 13
-			InputTitle.TextXAlignment = Enum.TextXAlignment.Left
-			InputTitle.Parent = Input
-			
-			local InputFrame = Instance.new("Frame")
-			InputFrame.Name = "InputFrame"
-			InputFrame.BackgroundColor3 = SelectedTheme.InputBackground
-			InputFrame.BorderSizePixel = 0
-			InputFrame.Position = UDim2.new(0, 15, 0, 35)
-			InputFrame.Size = UDim2.new(1, -30, 0, 25)
-			InputFrame.Parent = Input
-			
-			local InputFrameCorner = Instance.new("UICorner")
-			InputFrameCorner.CornerRadius = UDim.new(0, 4)
-			InputFrameCorner.Parent = InputFrame
-			
-			local InputFrameStroke = Instance.new("UIStroke")
-			InputFrameStroke.Color = SelectedTheme.InputStroke
-			InputFrameStroke.Thickness = 1
-			InputFrameStroke.Parent = InputFrame
-			
-			local InputBox = Instance.new("TextBox")
-			InputBox.Name = "InputBox"
-			InputBox.BackgroundTransparency = 1
-			InputBox.Position = UDim2.new(0, 10, 0, 0)
-			InputBox.Size = UDim2.new(1, -20, 1, 0)
-			InputBox.Font = Enum.Font.Gotham
-			InputBox.PlaceholderText = InputSettings.Placeholder or "Enter text..."
-			InputBox.PlaceholderColor3 = SelectedTheme.PlaceholderColor
-			InputBox.Text = InputSettings.CurrentValue or ""
-			InputBox.TextColor3 = SelectedTheme.TextColor
-			InputBox.TextSize = 12
-			InputBox.TextXAlignment = Enum.TextXAlignment.Left
-			InputBox.ClearTextOnFocus = false
-			InputBox.Parent = InputFrame
+			Input.BackgroundColor3 = SelectedTheme.ElementBackground
+			Input.InputFrame.BackgroundColor3 = SelectedTheme.InputBackground
 			
 			InputSettings.CurrentValue = InputSettings.CurrentValue or ""
 			InputSettings.Type = "Input"
+			InputSettings.Placeholder = InputSettings.Placeholder or "Enter text..."
 			InputSettings.Callback = InputSettings.Callback or function() end
+			
+			Input.InputFrame.InputBox.PlaceholderText = InputSettings.Placeholder
+			Input.InputFrame.InputBox.Text = InputSettings.CurrentValue
 			
 			local InputValue = {
 				Type = "Input",
@@ -2014,15 +1469,15 @@ function MercuryLibrary:CreateWindow(Settings)
 				Locked = false
 			}
 			
-			InputBox.Focused:Connect(function()
-				Tween(InputFrameStroke, {Color = SelectedTheme.AccentColor})
+			Input.InputFrame.InputBox.Focused:Connect(function()
+				Tween(Input.InputFrame.UIStroke, {Color = SelectedTheme.AccentColor}, 0.2)
 			end)
 			
-			InputBox.FocusLost:Connect(function()
-				Tween(InputFrameStroke, {Color = SelectedTheme.InputStroke})
+			Input.InputFrame.InputBox.FocusLost:Connect(function()
+				Tween(Input.InputFrame.UIStroke, {Color = SelectedTheme.InputStroke}, 0.2)
 				
 				if not InputValue.Locked then
-					InputValue.CurrentValue = InputBox.Text
+					InputValue.CurrentValue = Input.InputFrame.InputBox.Text
 					local success, err = pcall(InputValue.Callback, InputValue.CurrentValue)
 					if not success then
 						ShowError(InputSettings.Name, err)
@@ -2032,7 +1487,7 @@ function MercuryLibrary:CreateWindow(Settings)
 			end)
 			
 			function InputValue:Set(Text)
-				InputBox.Text = Text
+				Input.InputFrame.InputBox.Text = Text
 				InputValue.CurrentValue = Text
 				local success, err = pcall(InputValue.Callback, Text)
 				if not success then
@@ -2050,26 +1505,22 @@ function MercuryLibrary:CreateWindow(Settings)
 			end
 			
 			function InputValue:SetPlaceholder(NewPlaceholder)
-				InputBox.PlaceholderText = NewPlaceholder
+				Input.InputFrame.InputBox.PlaceholderText = NewPlaceholder
 			end
 			
 			function InputValue:SetLocked(Locked)
 				InputValue.Locked = Locked
-				InputBox.TextEditable = not Locked
+				Input.InputFrame.InputBox.TextEditable = not Locked
 				if Locked then
-					Tween(Input, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(InputTitle, {TextTransparency = 0.5})
-					Tween(InputBox, {TextTransparency = 0.5})
+					Tween(Input, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Input.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Input, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(InputTitle, {TextTransparency = 0})
-					Tween(InputBox, {TextTransparency = 0})
+					Tween(Input, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Input.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function InputValue:Remove()
-				Tween(Input, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Input:Destroy()
 			end
 			
@@ -2082,64 +1533,19 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateKeybind(KeybindSettings)
-			local Keybind = Instance.new("Frame")
+			local Keybind = TabPage.Keybind:Clone()
 			Keybind.Name = KeybindSettings.Name
-			Keybind.BackgroundColor3 = SelectedTheme.ElementBackground
-			Keybind.BorderSizePixel = 0
-			Keybind.Size = UDim2.new(1, 0, 0, 40)
+			Keybind.Title.Text = KeybindSettings.Name
+			Keybind.Visible = true
 			Keybind.Parent = TabPage
 			
-			local KeybindCorner = Instance.new("UICorner")
-			KeybindCorner.CornerRadius = UDim.new(0, 6)
-			KeybindCorner.Parent = Keybind
-			
-			local KeybindStroke = Instance.new("UIStroke")
-			KeybindStroke.Color = SelectedTheme.ElementStroke
-			KeybindStroke.Thickness = 1
-			KeybindStroke.Parent = Keybind
-			
-			local KeybindTitle = Instance.new("TextLabel")
-			KeybindTitle.Name = "Title"
-			KeybindTitle.BackgroundTransparency = 1
-			KeybindTitle.Position = UDim2.new(0, 15, 0, 0)
-			KeybindTitle.Size = UDim2.new(1, -130, 1, 0)
-			KeybindTitle.Font = Enum.Font.GothamSemibold
-			KeybindTitle.Text = KeybindSettings.Name
-			KeybindTitle.TextColor3 = SelectedTheme.TextColor
-			KeybindTitle.TextSize = 13
-			KeybindTitle.TextXAlignment = Enum.TextXAlignment.Left
-			KeybindTitle.Parent = Keybind
-			
-			local KeybindFrame = Instance.new("Frame")
-			KeybindFrame.Name = "KeybindFrame"
-			KeybindFrame.BackgroundColor3 = SelectedTheme.InputBackground
-			KeybindFrame.BorderSizePixel = 0
-			KeybindFrame.Position = UDim2.new(1, -115, 0.5, -12)
-			KeybindFrame.Size = UDim2.new(0, 100, 0, 24)
-			KeybindFrame.Parent = Keybind
-			
-			local KeybindFrameCorner = Instance.new("UICorner")
-			KeybindFrameCorner.CornerRadius = UDim.new(0, 4)
-			KeybindFrameCorner.Parent = KeybindFrame
-			
-			local KeybindFrameStroke = Instance.new("UIStroke")
-			KeybindFrameStroke.Color = SelectedTheme.InputStroke
-			KeybindFrameStroke.Thickness = 1
-			KeybindFrameStroke.Parent = KeybindFrame
-			
-			local KeybindBox = Instance.new("TextButton")
-			KeybindBox.Name = "KeybindBox"
-			KeybindBox.BackgroundTransparency = 1
-			KeybindBox.Size = UDim2.new(1, 0, 1, 0)
-			KeybindBox.Font = Enum.Font.GothamSemibold
-			KeybindBox.Text = KeybindSettings.CurrentKeybind or "None"
-			KeybindBox.TextColor3 = SelectedTheme.TextColor
-			KeybindBox.TextSize = 11
-			KeybindBox.Parent = KeybindFrame
+			Keybind.BackgroundColor3 = SelectedTheme.ElementBackground
+			Keybind.KeybindFrame.BackgroundColor3 = SelectedTheme.InputBackground
 			
 			KeybindSettings.CurrentKeybind = KeybindSettings.CurrentKeybind or "None"
 			KeybindSettings.Type = "Keybind"
 			KeybindSettings.Callback = KeybindSettings.Callback or function() end
+			Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
 			
 			local CheckingForKey = false
 			
@@ -2151,21 +1557,26 @@ function MercuryLibrary:CreateWindow(Settings)
 				Locked = false
 			}
 			
-			KeybindBox.MouseButton1Click:Connect(function()
-				if KeybindValue.Locked then return end
-				
+			Keybind.KeybindFrame.KeybindBox.Focused:Connect(function()
 				CheckingForKey = true
-				KeybindBox.Text = "..."
-				Tween(KeybindFrameStroke, {Color = SelectedTheme.AccentColor})
+				Keybind.KeybindFrame.KeybindBox.Text = "..."
+				Tween(Keybind.KeybindFrame.UIStroke, {Color = SelectedTheme.AccentColor}, 0.2)
+			end)
+			
+			Keybind.KeybindFrame.KeybindBox.FocusLost:Connect(function()
+				CheckingForKey = false
+				if Keybind.KeybindFrame.KeybindBox.Text == "..." then
+					Keybind.KeybindFrame.KeybindBox.Text = KeybindValue.CurrentKeybind
+				end
+				Tween(Keybind.KeybindFrame.UIStroke, {Color = SelectedTheme.InputStroke}, 0.2)
 			end)
 			
 			UserInputService.InputBegan:Connect(function(input, processed)
 				if CheckingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
 					local NewKey = input.KeyCode.Name
-					KeybindBox.Text = NewKey
+					Keybind.KeybindFrame.KeybindBox.Text = NewKey
 					KeybindValue.CurrentKeybind = NewKey
-					CheckingForKey = false
-					Tween(KeybindFrameStroke, {Color = SelectedTheme.InputStroke})
+					Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
 					SaveConfiguration()
 				elseif not processed and not CheckingForKey and input.KeyCode.Name == KeybindValue.CurrentKeybind and KeybindValue.CurrentKeybind ~= "None" then
 					local success, err = pcall(KeybindValue.Callback, KeybindValue.CurrentKeybind)
@@ -2175,18 +1586,8 @@ function MercuryLibrary:CreateWindow(Settings)
 				end
 			end)
 			
-			KeybindBox.MouseEnter:Connect(function()
-				if not KeybindValue.Locked then
-					Tween(KeybindFrame, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
-				end
-			end)
-			
-			KeybindBox.MouseLeave:Connect(function()
-				Tween(KeybindFrame, {BackgroundColor3 = SelectedTheme.InputBackground})
-			end)
-			
 			function KeybindValue:Set(NewKeybind)
-				KeybindBox.Text = NewKeybind
+				Keybind.KeybindFrame.KeybindBox.Text = NewKeybind
 				KeybindValue.CurrentKeybind = NewKeybind
 				SaveConfiguration()
 			end
@@ -2202,19 +1603,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function KeybindValue:SetLocked(Locked)
 				KeybindValue.Locked = Locked
 				if Locked then
-					Tween(Keybind, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(KeybindTitle, {TextTransparency = 0.5})
-					Tween(KeybindBox, {TextTransparency = 0.5})
+					Tween(Keybind, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(Keybind.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(Keybind, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(KeybindTitle, {TextTransparency = 0})
-					Tween(KeybindBox, {TextTransparency = 0})
+					Tween(Keybind, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(Keybind.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function KeybindValue:Remove()
-				Tween(Keybind, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				Keybind:Destroy()
 			end
 			
@@ -2227,73 +1624,20 @@ function MercuryLibrary:CreateWindow(Settings)
 		end
 		
 		function Tab:CreateColorPicker(ColorPickerSettings)
-			local ColorPicker = Instance.new("Frame")
+			local ColorPicker = TabPage.ColorPicker:Clone()
 			ColorPicker.Name = ColorPickerSettings.Name
-			ColorPicker.BackgroundColor3 = SelectedTheme.ElementBackground
-			ColorPicker.BorderSizePixel = 0
-			ColorPicker.Size = UDim2.new(1, 0, 0, 40)
+			ColorPicker.Title.Text = ColorPickerSettings.Name
+			ColorPicker.Visible = true
 			ColorPicker.Parent = TabPage
 			
-			local ColorPickerCorner = Instance.new("UICorner")
-			ColorPickerCorner.CornerRadius = UDim.new(0, 6)
-			ColorPickerCorner.Parent = ColorPicker
-			
-			local ColorPickerStroke = Instance.new("UIStroke")
-			ColorPickerStroke.Color = SelectedTheme.ElementStroke
-			ColorPickerStroke.Thickness = 1
-			ColorPickerStroke.Parent = ColorPicker
-			
-			local ColorPickerTitle = Instance.new("TextLabel")
-			ColorPickerTitle.Name = "Title"
-			ColorPickerTitle.BackgroundTransparency = 1
-			ColorPickerTitle.Position = UDim2.new(0, 15, 0, 0)
-			ColorPickerTitle.Size = UDim2.new(1, -70, 1, 0)
-			ColorPickerTitle.Font = Enum.Font.GothamSemibold
-			ColorPickerTitle.Text = ColorPickerSettings.Name
-			ColorPickerTitle.TextColor3 = SelectedTheme.TextColor
-			ColorPickerTitle.TextSize = 13
-			ColorPickerTitle.TextXAlignment = Enum.TextXAlignment.Left
-			ColorPickerTitle.Parent = ColorPicker
-			
-			local CPBackground = Instance.new("Frame")
-			CPBackground.Name = "CPBackground"
-			CPBackground.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			CPBackground.BorderSizePixel = 0
-			CPBackground.Position = UDim2.new(1, -50, 0.5, -12)
-			CPBackground.Size = UDim2.new(0, 35, 0, 24)
-			CPBackground.Parent = ColorPicker
-			
-			local CPBackgroundCorner = Instance.new("UICorner")
-			CPBackgroundCorner.CornerRadius = UDim.new(0, 4)
-			CPBackgroundCorner.Parent = CPBackground
-			
-			local CPBackgroundStroke = Instance.new("UIStroke")
-			CPBackgroundStroke.Color = SelectedTheme.ElementStroke
-			CPBackgroundStroke.Thickness = 2
-			CPBackgroundStroke.Parent = CPBackground
-			
-			local Display = Instance.new("Frame")
-			Display.Name = "Display"
-			Display.BackgroundColor3 = ColorPickerSettings.Color or Color3.fromRGB(255, 255, 255)
-			Display.BorderSizePixel = 0
-			Display.Position = UDim2.new(0, 2, 0, 2)
-			Display.Size = UDim2.new(1, -4, 1, -4)
-			Display.Parent = CPBackground
-			
-			local DisplayCorner = Instance.new("UICorner")
-			DisplayCorner.CornerRadius = UDim.new(0, 2)
-			DisplayCorner.Parent = Display
-			
-			local ColorPickerInteract = Instance.new("TextButton")
-			ColorPickerInteract.Name = "Interact"
-			ColorPickerInteract.BackgroundTransparency = 1
-			ColorPickerInteract.Size = UDim2.new(1, 0, 1, 0)
-			ColorPickerInteract.Text = ""
-			ColorPickerInteract.Parent = ColorPicker
+			ColorPicker.BackgroundColor3 = SelectedTheme.ElementBackground
 			
 			ColorPickerSettings.Color = ColorPickerSettings.Color or Color3.fromRGB(255, 255, 255)
 			ColorPickerSettings.Type = "ColorPicker"
 			ColorPickerSettings.Callback = ColorPickerSettings.Callback or function() end
+			
+			local Display = ColorPicker.CPBackground.Display
+			Display.BackgroundColor3 = ColorPickerSettings.Color
 			
 			local ColorPickerValue = {
 				Type = "ColorPicker",
@@ -2303,36 +1647,38 @@ function MercuryLibrary:CreateWindow(Settings)
 				Locked = false
 			}
 			
-			ColorPickerInteract.MouseEnter:Connect(function()
+			ColorPicker.Interact.MouseEnter:Connect(function()
 				if not ColorPickerValue.Locked then
-					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover})
+					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}, 0.2)
 				end
 			end)
 			
-			ColorPickerInteract.MouseLeave:Connect(function()
+			ColorPicker.Interact.MouseLeave:Connect(function()
 				if not ColorPickerValue.Locked then
-					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackground})
+					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.2)
 				end
 			end)
 			
-			ColorPickerInteract.MouseButton1Click:Connect(function()
+			ColorPicker.Interact.MouseButton1Click:Connect(function()
 				if ColorPickerValue.Locked then return end
 				
-				RippleEffect(ColorPicker, ColorPickerInteract.AbsolutePosition.X - ColorPicker.AbsolutePosition.X + ColorPickerInteract.AbsoluteSize.X / 2, ColorPickerInteract.AbsolutePosition.Y - ColorPicker.AbsolutePosition.Y + ColorPickerInteract.AbsoluteSize.Y / 2)
+				local mousePos = UserInputService:GetMouseLocation()
+				local pickerPos = ColorPicker.AbsolutePosition
+				RippleEffect(ColorPicker, mousePos.X - pickerPos.X, mousePos.Y - pickerPos.Y)
 				
-				-- Simple color rotation demo
+				-- Cycle through preset colors as a demo
 				local r, g, b = ColorPickerValue.Color.R, ColorPickerValue.Color.G, ColorPickerValue.Color.B
 				local newColor = Color3.fromRGB(
-					math.floor((r * 255 + 30) % 255),
-					math.floor((g * 255 + 60) % 255),
-					math.floor((b * 255 + 90) % 255)
+					math.floor((r * 255 + 50) % 256),
+					math.floor((g * 255 + 100) % 256),
+					math.floor((b * 255 + 150) % 256)
 				)
 				ColorPickerValue:Set(newColor)
 			end)
 			
 			function ColorPickerValue:Set(NewColor)
 				ColorPickerValue.Color = NewColor
-				Tween(Display, {BackgroundColor3 = NewColor})
+				Tween(Display, {BackgroundColor3 = NewColor}, 0.3)
 				local success, err = pcall(ColorPickerValue.Callback, NewColor)
 				if not success then
 					ShowError(ColorPickerSettings.Name, err)
@@ -2351,17 +1697,15 @@ function MercuryLibrary:CreateWindow(Settings)
 			function ColorPickerValue:SetLocked(Locked)
 				ColorPickerValue.Locked = Locked
 				if Locked then
-					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground})
-					Tween(ColorPickerTitle, {TextTransparency = 0.5})
+					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.SecondaryElementBackground}, 0.3)
+					Tween(ColorPicker.Title, {TextTransparency = 0.5}, 0.3)
 				else
-					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackground})
-					Tween(ColorPickerTitle, {TextTransparency = 0})
+					Tween(ColorPicker, {BackgroundColor3 = SelectedTheme.ElementBackground}, 0.3)
+					Tween(ColorPicker.Title, {TextTransparency = 0}, 0.3)
 				end
 			end
 			
 			function ColorPickerValue:Remove()
-				Tween(ColorPicker, {Size = UDim2.new(1, 0, 0, 0)})
-				task.wait(0.3)
 				ColorPicker:Destroy()
 			end
 			
@@ -2387,6 +1731,7 @@ function MercuryLibrary:CreateWindow(Settings)
 		return Tab
 	end
 	
+	-- Auto-load configuration
 	task.delay(1, function()
 		MercuryLibrary:LoadConfiguration()
 	end)
